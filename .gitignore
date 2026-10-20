@@ -1,0 +1,17 @@
+# 构建输出
+bin/
+obj/
+publish/
+dist/
+*.exe
+
+# 构建时下载的 .NET 运行时（不要提交到仓库）
+redist/
+
+# IDE
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+*.DotSettings.user

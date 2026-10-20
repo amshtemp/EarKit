@@ -1,0 +1,83 @@
+EarKit — Third-Party Notices / 第三方组件声明
+=============================================
+
+EarKit uses the following third-party components. Their original copyright
+notices and licenses are reproduced or referenced below.
+
+-------------------------------------------------------------------------------
+1. WPF UI (Wpf.Ui, Wpf.Ui.Abstractions) 4.3.0
+   https://github.com/lepoco/wpfui
+   Copyright (C) 2021-2026 Leszek Pomianowski and WPF UI Contributors
+   License: MIT
+   (WPF UI itself includes components from VirtualizingWrapPanel,
+   fluentui-system-icons, dotnet/wpf, microsoft-ui-xaml — see
+   https://github.com/lepoco/wpfui/blob/main/ThirdPartyNotices.txt)
+
+2. H.NotifyIcon / H.NotifyIcon.Wpf / H.GeneratedIcons.System.Drawing 2.4.1
+   https://github.com/HavenDV/H.NotifyIcon
+   Copyright (c) havendv and contributors
+   License: MIT
+
+3. System.IO.Ports 10.0.0
+   https://github.com/dotnet/runtime
+   Copyright (c) .NET Foundation and Contributors
+   License: MIT
+
+4. C#/WinRT (WinRT.Runtime, Microsoft.Windows.SDK.NET projection)
+   https://github.com/microsoft/CsWinRT
+   Copyright (c) Microsoft Corporation
+   License: MIT
+
+5. Microsoft .NET Windows Desktop Runtime 10 (bundled in the installer only,
+   installed only when missing)
+   https://dotnet.microsoft.com/
+   Copyright (c) Microsoft Corporation
+   License: .NET Library License
+   https://dotnet.microsoft.com/dotnet_library_license.htm
+   Redistributed unmodified as part of the EarKit installer, as permitted by
+   the "Distributable Code" terms of that license.
+
+6. NSIS (Nullsoft Scriptable Install System) — used to build the installer
+   https://nsis.sourceforge.io/
+   Copyright (C) 1999-2023 Contributors
+   License: zlib/libpng license (installer stub and plugins)
+
+-------------------------------------------------------------------------------
+MIT License (applies to items 1–4)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+-------------------------------------------------------------------------------
+zlib/libpng License (applies to item 6)
+
+This software is provided 'as-is', without any express or implied warranty.
+In no event will the authors be held liable for any damages arising from the
+use of this software.
+
+Permission is granted to anyone to use this software for any purpose,
+including commercial applications, and to alter it and redistribute it
+freely, subject to the following restrictions:
+
+1. The origin of this software must not be misrepresented; you must not claim
+   that you wrote the original software. If you use this software in a
+   product, an acknowledgment in the product documentation would be
+   appreciated but is not required.
+2. Altered source versions must be plainly marked as such, and must not be
+   misrepresented as being the original software.
+3. This notice may not be removed or altered from any source distribution.
