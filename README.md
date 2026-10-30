@@ -1,3 +1,9 @@
+<h1 align="center">NOTE:</h1>
+<p align="center">
+This is an English translated fork of "ChuiFeng-wind/EarKit". I'm not the original author. <br>
+I don't intend to maintain it. Just for personal use. 
+</p>
+
 <p align="center">
   <img src="src/EarKit/Assets/app.png" width="112" alt="EarKit">
 </p>
