@@ -1,4 +1,4 @@
-EarKit — Third-Party Notices / 第三方组件声明
+EarKit — Third-Party Notices
 =============================================
 
 EarKit uses the following third-party components. Their original copyright

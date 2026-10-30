@@ -5,63 +5,63 @@
 <h1 align="center">EarKit</h1>
 
 <p align="center">
-  在 Windows 上控制你的 EarFun 耳机：降噪、均衡器、按键、多设备连接，一个托盘图标全搞定。
+  Control your EarFun headphones on Windows: noise cancellation, equalizer, button controls, and multipoint connections—all from the system tray.
 </p>
 
 <p align="center">
-  <a href="../../releases/latest"><img src="https://img.shields.io/github/v/release/ChuiFeng-wind/EarKit?include_prereleases&label=下载" alt="Release"></a>
+  <a href="../../releases/latest"><img src="https://img.shields.io/github/v/release/ChuiFeng-wind/EarKit?include_prereleases&label=Download" alt="Release"></a>
   <img src="https://img.shields.io/badge/Windows-10%20%7C%2011-0078D4" alt="Windows 10 | 11">
   <img src="https://img.shields.io/badge/.NET-10-512BD4" alt=".NET 10">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" alt="MIT"></a>
 </p>
 
 > [!IMPORTANT]
-> **EarKit 是非官方的第三方开源项目**，与 EarFun 公司无关，未获其认可或赞助。“EarFun”及其产品名称是其各自所有者的商标，本项目提及它们仅用于说明兼容性。请勿就本软件的问题联系 EarFun 官方客服。
+> **EarKit is an unofficial, third-party open-source project** and is not affiliated with, endorsed by, or sponsored by EarFun. “EarFun” and its product names are trademarks of their respective owners and are mentioned only to describe compatibility. Please do not contact EarFun customer support about issues with this software.
 
 ---
 
-## 📸 截图
+## 📸 Screenshots
 
 <p align="center">
-  <img src="docs/screenshots/overview.png" width="760" alt="概览">
+  <img src="docs/screenshots/overview.png" width="760" alt="Overview">
 </p>
 
-| 降噪 | 均衡器 |
+| Noise cancellation | Equalizer |
 |:---:|:---:|
-| <img src="docs/screenshots/noise.png" alt="降噪"> | <img src="docs/screenshots/equalizer.png" alt="均衡器"> |
-| **按键** | **耳机设置** |
-| <img src="docs/screenshots/keys.png" alt="按键"> | <img src="docs/screenshots/device.png" alt="耳机设置"> |
+| <img src="docs/screenshots/noise.png" alt="Noise cancellation"> | <img src="docs/screenshots/equalizer.png" alt="Equalizer"> |
+| **Controls** | **Headphone settings** |
+| <img src="docs/screenshots/keys.png" alt="Controls"> | <img src="docs/screenshots/device.png" alt="Headphone settings"> |
 
-## ✨ 功能
+## ✨ Features
 
-| 页面 | 能做什么 |
+| Page | Features |
 |---|---|
-| **概览** | 左耳 / 右耳 / 充电盒电量，连接状态，固件版本 |
-| **降噪** | 降噪 / 通透 / 关闭；降噪子模式（均衡、自适应、抗风噪等）；通透模式（默认 / 自然） |
-| **均衡器** | 官方预设、拖动调节、实时曲线；保存和管理自定义预设 |
-| **按键** | 自定义左右耳的单击、双击、三击、长按功能 |
-| **多设备连接** | 查看已连接的手机 / 电脑，切换、断开，进入配对模式；LDAC 冲突提示 |
-| **耳机设置** | 游戏模式、音质（LDAC / aptX / 自适应 / 无损）、提示音量、查找耳机、麦克风、佩戴检测、自动关机等（视型号而定） |
-| **应用设置** | 深色 / 浅色 / 跟随系统，云母 / 亚克力背景与不透明度，开机自启，托盘，通知，快捷键 |
-| **调试日志** | 查看收发的原始数据，手动发送命令，导出日志 |
+| **Overview** | Left, right, and case battery levels; connection status; firmware version |
+| **Noise cancellation** | Noise cancellation / transparency / off; noise-cancellation modes (balanced, adaptive, wind reduction, etc.); transparency modes (default / natural) |
+| **Equalizer** | Official presets, drag-to-adjust controls, real-time curve; save and manage custom presets |
+| **Controls** | Customize single-click, double-click, triple-click, and long-press actions for each earbud |
+| **Multipoint** | View connected phones and computers, switch or disconnect devices, and enter pairing mode; LDAC conflict warnings |
+| **Headphone settings** | Game mode, audio codec (LDAC / aptX / adaptive / lossless), prompt volume, Find My Earbuds, microphone, wear detection, auto power-off, and more (model-dependent) |
+| **App settings** | Dark / light / follow system; Mica / Acrylic backgrounds and opacity; launch at startup, tray, notifications, and hotkeys |
+| **Debug log** | View raw data sent and received, send commands manually, and export logs |
 
-**常驻托盘**
+**Always available in the system tray**
 
-- 关闭窗口后最小化到托盘，鼠标悬停即可看到电量和当前降噪模式
-- 右键菜单快速切换降噪模式、游戏模式，或重新连接
-- 全局快捷键 <kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>N</kbd> 循环切换降噪模式（可自定义）
-- 耳机连上电脑后自动连接，电量低时提醒
+- Closing the window minimizes the app to the tray; hover to see battery levels and the current noise-cancellation mode.
+- Use the context menu to quickly switch noise-cancellation or game modes, or reconnect.
+- Cycle through noise-cancellation modes with the global <kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>N</kbd> hotkey (customizable).
+- Automatically connect when the headphones connect to the computer and receive low-battery alerts.
 
-## 🎧 支持的型号
+## 🎧 Supported models
 
-共 23 款，分别使用高通 GAIA 协议和 EF 协议，程序会自动识别型号。
+23 models are supported, using either the Qualcomm GAIA or EF protocol. EarKit detects the model automatically.
 
-| 高通 GAIA 协议 | EF 协议 |
+| Qualcomm GAIA protocol | EF protocol |
 |---|---|
-| Air Pro 4 ✅ 已实测 | Air Pro 4i |
+| Air Pro 4 ✅ Tested | Air Pro 4i |
 | Air Pro 4+ | Air 2 NC / Air 2 NC (VDL) |
 | Air Pro 4+ AI | Air Life |
-| Air Pro 5 | OpenJump / OpenJump (新款) |
+| Air Pro 5 | OpenJump / OpenJump (new model) |
 | Air Pro 3 / Air Pro 3 (3072) | Clip / Clip 2 |
 | Free Pro 3 | Wave Life |
 | Air S / Air S (TW201) | Tune Pro |
@@ -69,101 +69,101 @@
 | Wave Pro X | |
 | ATVEL Tune S5 ProX | |
 
-除标注外的型号尚未实机测试。如果你在其他型号上用过，无论是否正常，都欢迎在 [Issues](../../issues) 中反馈。
+Models not marked as tested have not been verified on physical devices. If you have tried EarKit with any other model, please share your feedback in [Issues](../../issues), whether it worked or not.
 
-## 📥 安装
+## 📥 Installation
 
-1. 前往 [Releases](../../releases/latest) 下载 `EarKit-x.y.z-Setup.exe` 并运行。
-2. 安装包没有数字签名，Windows 可能提示“Windows 已保护你的电脑”，点击 **更多信息 → 仍要运行** 即可。
-3. 如果电脑缺少 .NET 10 桌面运行时，安装程序会自动安装，无需手动下载。
+1. Go to [Releases](../../releases/latest), download `EarKit-x.y.z-Setup.exe`, and run it.
+2. The installer is not digitally signed. Windows may display “Windows protected your PC”; select **More info → Run anyway** to continue.
+3. If the .NET 10 Desktop Runtime is missing, the installer will install it automatically.
 
-**系统要求**：Windows 10 2004 及以上（64 位）；云母 / 亚克力背景需要 Windows 11 22H2 及以上。
+**System requirements**: 64-bit Windows 10 version 2004 or later. Mica / Acrylic backgrounds require Windows 11 version 22H2 or later.
 
-## 🚀 使用
+## 🚀 Usage
 
-1. 先在 Windows 的 **设置 → 蓝牙和设备** 中配对并连接耳机。
-2. 打开 EarKit，在顶部选择你的耳机，点击 **连接**。
-3. 之后 EarKit 会记住这副耳机，下次耳机连上电脑时会自动连接。
+1. Pair and connect your headphones in Windows **Settings → Bluetooth & devices**.
+2. Open EarKit, select your headphones at the top, and click **Connect**.
+3. EarKit will remember your headphones and connect automatically the next time they connect to the computer.
 
-## ❓ 常见问题
+## ❓ FAQ
 
 <details>
-<summary><b>连接失败或一直显示“正在连接”</b></summary>
+<summary><b>Connection fails or remains stuck on “Connecting”</b></summary>
 
-- 耳机的控制通道同一时间通常只能被一台设备占用。请先 **关闭手机上的 EarFun App**，必要时断开手机蓝牙后再试。
-- 确认耳机在 Windows 蓝牙设置中显示为“已连接”。
-- 仍然不行的话，在 **应用设置 → 连接方式（高级）** 中尝试改用蓝牙 COM 端口连接。
+- The headphone control channel can usually be used by only one device at a time. **Close the EarFun app on your phone** first; if needed, disconnect Bluetooth on the phone and try again.
+- Make sure the headphones show as “Connected” in Windows Bluetooth settings.
+- If the issue persists, try connecting through a Bluetooth COM port in **App settings → Connection method (advanced)**.
 </details>
 
 <details>
-<summary><b>识别出的型号不对 / 部分功能不显示</b></summary>
+<summary><b>The detected model is incorrect or some features are missing</b></summary>
 
-在 **应用设置 → 耳机型号** 中手动选择正确的型号。
+Manually select the correct model in **App settings → Headphone model**.
 </details>
 
 <details>
-<summary><b>搜索不到 EarKit / 开始菜单里没有</b></summary>
+<summary><b>EarKit cannot be found / It is missing from the Start menu</b></summary>
 
-安装时勾选“开始菜单快捷方式”（默认勾选）。如果当时取消了，重新运行安装程序勾选即可，设置不会丢失。
+Select “Start Menu shortcut” during installation (selected by default). If you skipped it, run the installer again and select it; your settings will be preserved.
 </details>
 
 <details>
-<summary><b>恢复出厂设置、“解锁全部功能”安全吗？</b></summary>
+<summary><b>Are factory reset and “Unlock all features” safe?</b></summary>
 
-这些操作可能导致耳机设置丢失或功能异常，请谨慎使用，风险自负。“解锁全部功能”会显示当前型号未声明支持的选项，仅供测试。
+These actions may erase headphone settings or cause features to malfunction. Use them with caution and at your own risk. “Unlock all features” displays options not declared as supported by the current model, for testing only.
 </details>
 
-## 🗂️ 数据位置
+## 🗂️ Data locations
 
-| 内容 | 位置 |
+| Data | Location |
 |---|---|
-| 设置、自定义均衡器预设 | `%AppData%\EarKit\settings.json` |
-| 崩溃日志 | `%AppData%\EarKit\crash.log` |
-| 开机自启项 | `HKCU\Software\Microsoft\Windows\CurrentVersion\Run` → `EarKit` |
+| Settings and custom equalizer presets | `%AppData%\EarKit\settings.json` |
+| Crash log | `%AppData%\EarKit\crash.log` |
+| Launch-at-startup entry | `HKCU\Software\Microsoft\Windows\CurrentVersion\Run` → `EarKit` |
 
-命令行参数 `--tray`：启动后只显示托盘图标，不弹出窗口。
+Command-line argument `--tray`: show only the tray icon at startup without opening a window.
 
-卸载时可以选择是否同时删除上述个人数据。
+You can choose whether to delete this personal data when uninstalling.
 
-## 🛠️ 从源码构建
+## 🛠️ Building from source
 
-需要 [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0) 和 [NSIS 3](https://nsis.sourceforge.io/)（生成安装包时需要）。
+Requires the [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0) and [NSIS 3](https://nsis.sourceforge.io/) (required to build the installer).
 
 ```powershell
 git clone https://github.com/ChuiFeng-wind/EarKit.git
 cd EarKit
 
-./build.ps1                 # 生成 dist\EarKit-<版本>-Setup.exe
-./build.ps1 -NoInstaller    # 只发布程序到 publish\
-cd src/EarKit; dotnet run   # 直接调试运行
+./build.ps1                 # Creates dist\EarKit-<version>-Setup.exe
+./build.ps1 -NoInstaller    # Publishes the app to publish\ only
+cd src/EarKit; dotnet run   # Runs the app for debugging
 ```
 
-推送 `v*` 标签后，GitHub Actions 会自动构建安装包并创建 Release 草稿。
+After you push a `v*` tag, GitHub Actions automatically builds the installer and creates a draft release.
 
-**项目结构**
+**Project structure**
 
 ```
 src/EarKit/
-├─ Core/        型号表、协议编解码（高通 GAIA / EF）、蓝牙 RFCOMM 连接
-├─ Services/    设备控制、托盘、全局快捷键、设置、背景效果
-├─ Controls/    电量环、EQ 曲线等自绘控件
-└─ Pages/       各功能页面
-installer/      NSIS 安装脚本与安装许可
+├─ Core/        Model catalog, protocol encoding/decoding (Qualcomm GAIA / EF), Bluetooth RFCOMM connection
+├─ Services/    Device control, tray, global hotkeys, settings, background effects
+├─ Controls/    Custom-drawn controls such as battery rings and EQ curves
+└─ Pages/       Feature pages
+installer/      NSIS installer script and installer license
 ```
 
-技术栈：C# · .NET 10 · WPF · [WPF UI](https://github.com/lepoco/wpfui) · [H.NotifyIcon](https://github.com/HavenDV/H.NotifyIcon)
+Tech stack: C# · .NET 10 · WPF · [WPF UI](https://github.com/lepoco/wpfui) · [H.NotifyIcon](https://github.com/HavenDV/H.NotifyIcon)
 
-## 🐞 反馈问题
+## 🐞 Reporting issues
 
-请在 [Issues](../../issues) 中提供：
+Please include the following in [Issues](../../issues):
 
-- 耳机型号和 Windows 版本
-- 问题截图
-- **调试日志** 页导出的日志
-- 如果程序崩溃，附上 `%AppData%\EarKit\crash.log`
+- Headphone model and Windows version
+- A screenshot of the issue
+- The log exported from the **Debug log** page
+- If the app crashed, attach `%AppData%\EarKit\crash.log`
 
-## 📄 许可
+## 📄 License
 
-- EarKit 以 [MIT 许可证](LICENSE) 发布，按“原样”提供，不附带任何担保。
-- 第三方组件的许可见 [THIRD-PARTY-NOTICES.txt](THIRD-PARTY-NOTICES.txt)。
-- 安装包内置的 Microsoft .NET 桌面运行时受 [.NET Library License](https://dotnet.microsoft.com/dotnet_library_license.htm) 约束，按原样再分发。
+- EarKit is released under the [MIT License](LICENSE) and is provided “as is,” without warranty.
+- See [THIRD-PARTY-NOTICES.txt](THIRD-PARTY-NOTICES.txt) for licenses of third-party components.
+- The Microsoft .NET Desktop Runtime bundled with the installer is subject to the [.NET Library License](https://dotnet.microsoft.com/dotnet_library_license.htm) and is redistributed as-is.

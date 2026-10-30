@@ -1,25 +1,25 @@
-﻿EarKit 安装许可与用户须知
+﻿EarKit Installer License and User Notice
 ========================================
 
-请在安装前阅读以下内容。点击“我接受”即表示你同意下列全部条款。
+Please read the following before installing. By clicking “I Agree,” you accept all of the terms below.
 
-一、关于本软件
-1. EarKit 是独立的开源第三方工具，用于在 Windows 上控制兼容的 EarFun 耳机。
-2. “EarFun”及其产品名称是其各自所有者的商标。EarKit 与 EarFun 公司无关，未获其认可、赞助或技术支持。软件中出现的产品名称仅用于说明兼容性。
-3. 请勿就本软件的任何问题联系 EarFun 官方客服。
+1. About this software
+1. EarKit is an independent, open-source third-party tool for controlling compatible EarFun headphones on Windows.
+2. “EarFun” and its product names are trademarks of their respective owners. EarKit is not affiliated with, endorsed by, sponsored by, or supported by EarFun. Product names appearing in the software are used only to describe compatibility.
+3. Please do not contact EarFun customer support about any issues with this software.
 
-二、免责声明
-1. 本软件按“原样”提供，不附带任何明示或暗示的担保。
-2. 恢复出厂设置、重启耳机、“解锁全部功能”等操作可能导致耳机设置丢失或功能异常，请自行判断并承担风险。
-3. 在任何情况下，作者和贡献者均不对因使用或无法使用本软件造成的任何损失承担责任。
+2. Disclaimer
+1. This software is provided “as is,” without any express or implied warranties.
+2. Actions such as factory resetting, restarting the headphones, or “Unlock all features” may erase headphone settings or cause features to malfunction. Use your own judgment and assume all risks.
+3. In no event shall the authors or contributors be liable for any loss resulting from the use of, or inability to use, this software.
 
-三、.NET 运行时
-本安装程序内置 Microsoft .NET Windows 桌面运行时 10（仅在电脑缺少时安装）。该组件由 Microsoft 提供，按原样再分发，受《.NET Library License》约束：
+3. .NET Runtime
+This installer bundles Microsoft .NET Windows Desktop Runtime 10 and installs it only if it is missing. This component is provided by Microsoft and redistributed as-is under the .NET Library License:
 https://dotnet.microsoft.com/dotnet_library_license.htm
-安装本软件即表示你同时接受上述 Microsoft 许可条款。
+By installing this software, you also accept the Microsoft license terms above.
 
-四、开源许可
-EarKit 以 MIT 许可证发布，所用第三方组件的许可见安装目录中的 LICENSE.txt 与 THIRD-PARTY-NOTICES.txt。
+4. Open-source license
+EarKit is released under the MIT License. See LICENSE.txt and THIRD-PARTY-NOTICES.txt in the installation directory for the licenses of third-party components.
 
 ----------------------------------------
 MIT License

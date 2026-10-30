@@ -1,11 +1,11 @@
-# 构建输出
+# Build output
 bin/
 obj/
 publish/
 dist/
 *.exe
 
-# 构建时下载的 .NET 运行时（不要提交到仓库）
+# .NET runtime downloaded during the build (do not commit)
 redist/
 
 # IDE

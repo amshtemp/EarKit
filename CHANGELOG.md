@@ -1,9 +1,9 @@
-# 更新日志
+# Changelog
 
 ## 1.0.0
-首个公开版本。
+First public release.
 
-- 支持 23 款 EarFun 耳机（高通 GAIA / EF 协议）：电量、降噪、均衡器（含自定义预设）、按键、多设备连接、耳机设置。
-- 托盘常驻、全局快捷键 Ctrl+Alt+N 切换降噪、开机自启、自动连接、低电量提醒。
-- 深色/浅色/跟随系统主题，云母/亚克力背景与不透明度调节。
-- 安装程序自动检测并安装 .NET 10 桌面运行时；检测到已安装的 EarKit 时自动沿用原位置覆盖安装，保留设置与组件选择；可自动移除旧名称 “Earfun Tools” 的测试版并迁移设置。
+- Supports 23 EarFun headphone models (Qualcomm GAIA / EF protocols): battery levels, noise cancellation, equalizer (including custom presets), controls, multipoint, and headphone settings.
+- System tray, global Ctrl+Alt+N hotkey to switch noise-cancellation modes, launch at startup, automatic connection, and low-battery alerts.
+- Dark / light / follow-system themes, Mica / Acrylic backgrounds, and opacity controls.
+- The installer detects and installs the .NET 10 Desktop Runtime automatically; when an existing EarKit installation is found, it reuses the install location and preserves settings and component selections. It can also remove the old “Earfun Tools” beta and migrate its settings.
