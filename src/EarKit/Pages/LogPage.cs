@@ -14,7 +14,7 @@ public sealed class LogPage : UserControl
     static DeviceController C => DeviceController.I;
     readonly TextBox _log = new()
     {
-        IsReadOnly = true, FontFamily = new FontFamily("Cascadia Mono, Consolas, Microsoft YaHei UI"), FontSize = 12,
+        IsReadOnly = true, FontFamily = new FontFamily("Segoe UI"), FontSize = 12,
         VerticalScrollBarVisibility = ScrollBarVisibility.Auto, HorizontalScrollBarVisibility = ScrollBarVisibility.Auto,
         TextWrapping = TextWrapping.NoWrap, AcceptsReturn = true, VerticalContentAlignment = VerticalAlignment.Top,
     };
