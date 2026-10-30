@@ -63,8 +63,8 @@ public sealed class RingGauge : FrameworkElement
             }
         }
         double dpi = VisualTreeHelper.GetDpi(this).PixelsPerDip;
-        var tf = new Typeface(new FontFamily("Segoe UI Variable Display, Segoe UI, Microsoft YaHei UI"), FontStyles.Normal, FontWeights.SemiBold, FontStretches.Normal);
-        var tfn = new Typeface(new FontFamily("Segoe UI Variable Text, Microsoft YaHei UI, Segoe UI"), FontStyles.Normal, FontWeights.Normal, FontStretches.Normal);
+        var tf = new Typeface(new FontFamily("Segoe UI"), FontStyles.Normal, FontWeights.SemiBold, FontStretches.Normal);
+        var tfn = new Typeface(new FontFamily("Segoe UI"), FontStyles.Normal, FontWeights.Normal, FontStretches.Normal);
         string main = valid ? Value + "%" : "--";
         var ft = new FormattedText(main, CultureInfo.CurrentUICulture, FlowDirection.LeftToRight, tf, d * 0.22, TextBrush, dpi);
         dc.DrawText(ft, new Point(c.X - ft.Width / 2, c.Y - ft.Height / 2 - (Charging ? d * 0.06 : 0)));
