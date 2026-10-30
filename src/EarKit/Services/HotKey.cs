@@ -32,7 +32,7 @@ public sealed class HotKeyService : IDisposable
     }
     public static string Describe(int mods, int vk)
     {
-        if (vk == 0) return "未设置";
+        if (vk == 0) return "Not set";
         var p = new List<string>();
         if ((mods & MOD_CONTROL) != 0) p.Add("Ctrl");
         if ((mods & MOD_ALT) != 0) p.Add("Alt");

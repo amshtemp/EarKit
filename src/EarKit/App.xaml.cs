@@ -39,7 +39,7 @@ public partial class App : Application
         {
             CrashLog.Write("UI", a.Exception);
             a.Handled = true;
-            try { System.Windows.MessageBox.Show("程序出现错误，已记录到：\n" + CrashLog.PathFile + "\n\n" + a.Exception.Message, "EarKit", System.Windows.MessageBoxButton.OK, MessageBoxImage.Warning); } catch { }
+            try { System.Windows.MessageBox.Show("An error occurred. Details were saved to:\n" + CrashLog.PathFile + "\n\n" + a.Exception.Message, "EarKit", System.Windows.MessageBoxButton.OK, MessageBoxImage.Warning); } catch { }
         };
         AppDomain.CurrentDomain.UnhandledException += (_, a) => CrashLog.Write("Domain", a.ExceptionObject as Exception);
         TaskScheduler.UnobservedTaskException += (_, a) => { CrashLog.Write("Task", a.Exception); a.SetObserved(); };
@@ -74,7 +74,7 @@ public partial class App : Application
         var s = AppSettings.Current;
         bool ok = HotKey?.Apply(s.HotkeyEnabled, s.HotkeyMods, s.HotkeyVk) ?? false;
         if (!ok && s.HotkeyEnabled && !silent)
-            Tray?.Show("快捷键注册失败", $"{HotKeyService.Describe(s.HotkeyMods, s.HotkeyVk)} 可能已被其他程序占用", true);
+            Tray?.Show("Hotkey registration failed", $"{HotKeyService.Describe(s.HotkeyMods, s.HotkeyVk)} may already be in use by another application", true);
         return ok;
     }
 
@@ -82,8 +82,8 @@ public partial class App : Application
     {
         var c = DeviceController.I;
         var lbl = c.CycleNoise();
-        if (lbl != null) Tray?.Show("降噪模式", lbl);
-        else if (!c.IsConnected) Tray?.Show("EarKit", "耳机未连接");
+        if (lbl != null) Tray?.Show("Noise control", lbl);
+        else if (!c.IsConnected) Tray?.Show("EarKit", "Headset is not connected");
     }
 
     static bool _hooked;
@@ -97,12 +97,12 @@ public partial class App : Application
         try
         {
             bool dark = IsDark(theme);
-            // 只切换资源字典，背景效果交给 Backdrop 统一处理（不使用 SystemThemeWatcher，避免竞争导致主题错乱）
+            // Only switch the resource dictionary here; Backdrop handles window effects to avoid conflicts with WPF-UI theme updates.
             ApplicationThemeManager.Apply(dark ? ApplicationTheme.Dark : ApplicationTheme.Light, WindowBackdropType.None, true);
             if (win == null) return;
             HookSystemTheme(win);
             ApplyBackdrop();
-            // WPF-UI 可能在之后异步刷新窗口背景，空闲时再应用一次确保最终状态一致
+            // WPF-UI may refresh the window background asynchronously, so apply it again when idle to ensure the final state.
             win.Dispatcher.BeginInvoke(DispatcherPriority.ApplicationIdle, new Action(ApplyBackdrop));
         }
         catch (Exception e) { CrashLog.Write("theme", e); }

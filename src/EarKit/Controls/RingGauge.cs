@@ -3,7 +3,7 @@ using System.Windows;
 using System.Windows.Media;
 namespace EarKit.Controls;
 
-/// 电量圆环
+/// Power ring
 public sealed class RingGauge : FrameworkElement
 {
     public static readonly DependencyProperty ValueProperty = DependencyProperty.Register(nameof(Value), typeof(int), typeof(RingGauge),
@@ -70,7 +70,7 @@ public sealed class RingGauge : FrameworkElement
         dc.DrawText(ft, new Point(c.X - ft.Width / 2, c.Y - ft.Height / 2 - (Charging ? d * 0.06 : 0)));
         if (Charging)
         {
-            var ch = new FormattedText("⚡ 充电中", CultureInfo.CurrentUICulture, FlowDirection.LeftToRight, tfn, d * 0.09, SubBrush, dpi);
+            var ch = new FormattedText("⚡ Charging", CultureInfo.CurrentUICulture, FlowDirection.LeftToRight, tfn, d * 0.09, SubBrush, dpi);
             dc.DrawText(ch, new Point(c.X - ch.Width / 2, c.Y + d * 0.12));
         }
         var lt = new FormattedText(Label ?? "", CultureInfo.CurrentUICulture, FlowDirection.LeftToRight, tfn, 13, SubBrush, dpi);

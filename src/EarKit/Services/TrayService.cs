@@ -55,9 +55,9 @@ public sealed class TrayService : IDisposable
         if (!C.IsConnected || m == null) tip = "EarKit · " + C.StatusText;
         else
         {
-            var bat = m.IsHead ? $"电量 {Bat("bat_l")}" : $"左 {Bat("bat_l")} · 右 {Bat("bat_r")} · 盒 {Bat("bat_box")}";
+            var bat = m.IsHead ? $"Battery {Bat("bat_l")}" : $"L {Bat("bat_l")} · R {Bat("bat_r")} · Case {Bat("bat_box")}";
             var n = C.Get<string>("noise");
-            tip = $"{m.Name}\n{bat}" + (m.Noise.Count > 0 && n != null ? $"\n模式：{Catalog.NOISE_LABEL.GetValueOrDefault(n, n)}" : "");
+            tip = $"{m.Name}\n{bat}" + (m.Noise.Count > 0 && n != null ? $"\nMode: {Catalog.NOISE_LABEL.GetValueOrDefault(n, n)}" : "");
         }
         if (tip.Length > 120) tip = tip[..120];
         try { _tb.ToolTipText = tip; } catch { }
@@ -75,7 +75,7 @@ public sealed class TrayService : IDisposable
     {
         var cm = _tb.ContextMenu ?? new ContextMenu();
         cm.Items.Clear();
-        cm.Items.Add(Item("打开 EarKit", _show, bold: true));
+        cm.Items.Add(Item("Open EarKit", _show, bold: true));
         var m = C.Model;
         bool on = C.IsConnected && m != null;
         if (on && m!.Noise.Count > 0)
@@ -92,13 +92,13 @@ public sealed class TrayService : IDisposable
         {
             cm.Items.Add(new Separator());
             var g = C.Get<bool>("game");
-            cm.Items.Add(Item("游戏模式", () => C.SetGame(!g), isChecked: g));
+            cm.Items.Add(Item("Game mode", () => C.SetGame(!g), isChecked: g));
         }
         cm.Items.Add(new Separator());
-        if (on) cm.Items.Add(Item("断开连接", () => C.Disconnect(user: true)));
-        cm.Items.Add(Item(on ? "重新连接" : "连接耳机", () => C.Reconnect(), enabled: C.Conn != ConnState.Connecting));
+        if (on) cm.Items.Add(Item("Disconnect", () => C.Disconnect(user: true)));
+        cm.Items.Add(Item(on ? "Reconnect" : "Connect headset", () => C.Reconnect(), enabled: C.Conn != ConnState.Connecting));
         cm.Items.Add(new Separator());
-        cm.Items.Add(Item("退出", _exit));
+        cm.Items.Add(Item("Exit", _exit));
         _tb.ContextMenu = cm;
     }
 

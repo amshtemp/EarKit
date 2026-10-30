@@ -30,24 +30,24 @@ public sealed class LogPage : UserControl
         g.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
         g.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
         g.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
-        g.Children.Add(Ui.Header("调试日志", "收发的原始数据与解析结果。遇到问题时，可保存日志并反馈。"));
+        g.Children.Add(Ui.Header("Debug log", "Raw data and parsed results sent and received. Save and share the log if you encounter a problem."));
 
         var bar = new Grid { Margin = new Thickness(0, 0, 0, 8) };
         for (int i = 0; i < 6; i++) bar.ColumnDefinitions.Add(new ColumnDefinition { Width = i == 2 ? new GridLength(1, GridUnitType.Star) : GridLength.Auto });
-        _hex.ToolTip = "要发送的原始 HEX，例如 FF 04 00 00 00 0A 03 09";
+        _hex.ToolTip = "Raw HEX to send, for example: FF 04 00 00 00 0A 03 09";
         bar.Children.Add(_hex);
-        var send = Ui.Btn("发送", W.SymbolRegular.Play24, SendHex); send.Margin = new Thickness(8, 0, 0, 0);
+        var send = Ui.Btn("Send", W.SymbolRegular.Play24, SendHex); send.Margin = new Thickness(8, 0, 0, 0);
         Grid.SetColumn(send, 1); bar.Children.Add(send);
         var rp = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(12, 0, 0, 0) };
-        rp.Children.Add(new TextBlock { Text = "显示原始帧", VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(0, 0, 8, 0) });
+        rp.Children.Add(new TextBlock { Text = "Show raw frames", VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(0, 0, 8, 0) });
         _raw.IsChecked = AppSettings.Current.ShowRawHex;
         _raw.Checked += (_, _) => { AppSettings.Current.ShowRawHex = true; AppSettings.Save(); Reload(); };
         _raw.Unchecked += (_, _) => { AppSettings.Current.ShowRawHex = false; AppSettings.Save(); Reload(); };
         rp.Children.Add(_raw);
         Grid.SetColumn(rp, 3); bar.Children.Add(rp);
-        var clear = Ui.Btn("清空", W.SymbolRegular.Delete24, () => { C.LogBuffer.Clear(); Reload(); }); clear.Margin = new Thickness(12, 0, 0, 0);
+        var clear = Ui.Btn("Clear", W.SymbolRegular.Delete24, () => { C.LogBuffer.Clear(); Reload(); }); clear.Margin = new Thickness(12, 0, 0, 0);
         Grid.SetColumn(clear, 4); bar.Children.Add(clear);
-        var save = Ui.Btn("保存日志…", W.SymbolRegular.Save24, Save); save.Margin = new Thickness(8, 0, 0, 0);
+        var save = Ui.Btn("Save log…", W.SymbolRegular.Save24, Save); save.Margin = new Thickness(8, 0, 0, 0);
         Grid.SetColumn(save, 5); bar.Children.Add(save);
         Grid.SetRow(bar, 1); g.Children.Add(bar);
         Grid.SetRow(_log, 2); g.Children.Add(_log);
@@ -97,17 +97,17 @@ public sealed class LogPage : UserControl
     void SendHex()
     {
         var b = Util.ParseHex(_hex.Text);
-        if (b == null || b.Length == 0) { App.MainWin.AddNotice("HEX 格式错误", "请输入以空格分隔的十六进制字节，例如 FF 04 00 00 00 0A 03 09", NoticeKind.Warning); return; }
-        if (!C.IsConnected) { App.MainWin.AddNotice("未连接", "请先连接耳机", NoticeKind.Warning); return; }
+        if (b == null || b.Length == 0) { App.MainWin.AddNotice("Invalid HEX format", "Enter hexadecimal bytes separated by spaces, for example: FF 04 00 00 00 0A 03 09", NoticeKind.Warning); return; }
+        if (!C.IsConnected) { App.MainWin.AddNotice("Not connected", "Connect a headset first", NoticeKind.Warning); return; }
         C.SendRaw(b);
     }
 
     void Save()
     {
-        var dlg = new SaveFileDialog { FileName = $"earfun_log_{DateTime.Now:yyyyMMdd_HHmmss}.txt", Filter = "文本文件|*.txt" };
+        var dlg = new SaveFileDialog { FileName = $"earfun_log_{DateTime.Now:yyyyMMdd_HHmmss}.txt", Filter = "Text files|*.txt" };
         if (dlg.ShowDialog() != true) return;
         var sb = new StringBuilder();
-        sb.Append($"EarKit {typeof(App).Assembly.GetName().Version} · {Environment.OSVersion} · 型号 {C.Model?.ToString() ?? "-"} · 固件 {C.Firmware ?? "-"} · {C.LinkDesc ?? "-"}\r\n\r\n");
+        sb.Append($"EarKit {typeof(App).Assembly.GetName().Version} · {Environment.OSVersion} · Model {C.Model?.ToString() ?? "-"} · Firmware {C.Firmware ?? "-"} · {C.LinkDesc ?? "-"}\r\n\r\n");
         bool raw = AppSettings.Current.ShowRawHex;
         AppSettings.Current.ShowRawHex = true;
         foreach (var e in C.LogBuffer) sb.Append(Fmt(e));

@@ -3,7 +3,7 @@ namespace EarKit.Core;
 
 public delegate void LogFn(string dir, byte[]? data, string text);
 
-/// 负责收发线程、命令队列（40ms 间隔）、帧切分。回调在后台线程触发。
+/// Manages send/receive threads, the command queue (40 ms interval), and frame splitting. Callbacks run on background threads.
 public sealed class Session : IDisposable
 {
     public ILink Link { get; }
@@ -47,7 +47,7 @@ public sealed class Session : IDisposable
             catch (Exception e)
             {
                 if (!Alive) break;
-                _log("!!", null, "发送失败: " + e.Message);
+                _log("!!", null, "Send failed: " + e.Message);
                 Alive = false;
                 _onState(new StateUpdate { ["_disconnected"] = e.Message });
                 break;
@@ -66,7 +66,7 @@ public sealed class Session : IDisposable
             {
                 if (Alive)
                 {
-                    _log("!!", null, "接收失败: " + e.Message);
+                    _log("!!", null, "Receive failed: " + e.Message);
                     Alive = false;
                     _onState(new StateUpdate { ["_disconnected"] = e.Message });
                 }
@@ -85,7 +85,7 @@ public sealed class Session : IDisposable
                 foreach (var fr in frames) Handle(fam, fr);
                 break;
             }
-            if (_buf.Length > 4096) { _log("<<", _buf, "无法识别的数据（已丢弃）"); _buf = Array.Empty<byte>(); }
+            if (_buf.Length > 4096) { _log("<<", _buf, "Unrecognized data (discarded)"); _buf = Array.Empty<byte>(); }
         }
     }
 
@@ -94,13 +94,13 @@ public sealed class Session : IDisposable
         var p = Proto;
         if (fam != p.Family)
         {
-            _log("<<", fr, $"收到{(fam == "qcc" ? "高通 GAIA" : "EarFun EF")}帧——型号/协议可能选错了");
+            _log("<<", fr, $"Received a {(fam == "qcc" ? "Qualcomm GAIA" : "EarFun EF")} frame; the selected model or protocol may be incorrect");
             _onState(new StateUpdate { ["_wrong_family"] = fam });
             return;
         }
         string desc; StateUpdate upd;
         try { (desc, upd) = p.Parse(fr); }
-        catch (Exception e) { desc = "解析异常 " + e.Message; upd = new StateUpdate(); }
+        catch (Exception e) { desc = "Parse error: " + e.Message; upd = new StateUpdate(); }
         if (upd.Count > 0)
         {
             lock (State) foreach (var kv in upd) State[kv.Key] = kv.Value;
@@ -123,7 +123,7 @@ public sealed class Session : IDisposable
         try { Link.Dispose(); } catch { }
     }
 
-    /// 依次发送两种协议的"读固件版本"，看哪种有回应。返回 (family, version)
+    /// Send the firmware-version query for each protocol and return the one that responds: (family, version).
     public static (string? Family, string? Version) ProbeFamily(ILink link, LogFn? log, int timeoutMs = 1500)
     {
         var dq = new Model("_", "_", "qcc", "qcc", "q10", "");
@@ -132,8 +132,8 @@ public sealed class Session : IDisposable
         {
             var f = P.Probe();
             try { link.Write(f); }
-            catch (Exception e) { log?.Invoke("!!", null, "探测发送失败 " + e.Message); return (null, null); }
-            log?.Invoke(">>", f, "探测 " + P.Family);
+            catch (Exception e) { log?.Invoke("!!", null, "Probe send failed: " + e.Message); return (null, null); }
+            log?.Invoke(">>", f, "Probe " + P.Family);
             var buf = Array.Empty<byte>();
             var end = DateTime.Now.AddMilliseconds(timeoutMs);
             while (DateTime.Now < end)
@@ -143,7 +143,7 @@ public sealed class Session : IDisposable
                 buf = rest;
                 foreach (var fr in frames)
                 {
-                    log?.Invoke("<<", fr, "探测回应");
+                    log?.Invoke("<<", fr, "Probe response");
                     StateUpdate s;
                     try { s = P.Parse(fr).S; } catch { s = new StateUpdate(); }
                     if (s.TryGetValue("version", out var v)) return (P.Family, v as string);

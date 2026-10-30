@@ -5,7 +5,7 @@ using Wpf.Ui.Controls;
 using TextBlock = System.Windows.Controls.TextBlock;
 namespace EarKit.Controls;
 
-/// 代码构建界面用的小工具（所有主题色均用动态资源，跟随深浅色切换）
+/// Gadgets for code construction interfaces (all theme colors use dynamic resources, switching between dark and light colors)
 public static class Ui
 {
     public static TextBlock T(string text, string? style = null, double? size = null)
@@ -44,7 +44,7 @@ public static class Ui
         return sp;
     }
 
-    /// 设置行：图标 | 标题+说明 | 右侧控件
+/// Setting row: icon | title + description | right control
     public static Border Row(SymbolRegular icon, string title, string? desc, UIElement? right, UIElement? below = null)
     {
         var g = new Grid();
@@ -127,15 +127,15 @@ public static class Ui
     };
     public static string NoiseDesc(string mode) => mode switch
     {
-        "anc" or "anc1" or "anc2" => "隔绝外界噪音",
-        "ambient" => "听见周围声音",
-        "adaptive" => "随环境自动调节",
-        "wind" => "降低风噪",
-        _ => "不做降噪处理",
+        "anc" or "anc1" or "anc2" => "Isolate outside noise",
+        "ambient" => "hear surrounding sounds",
+        "adaptive" => "Automatically adjust to the environment",
+        "wind" => "Reduce wind noise",
+        _ => "No noise reduction processing",
     };
 
-    /// 确认对话框（Fluent 风格）
-    public static async Task<bool> Confirm(string title, string text, string ok = "确定", string cancel = "取消", bool danger = false)
+    /// Confirmation dialog box (Fluent style)
+    public static async Task<bool> Confirm(string title, string text, string ok = "OK", string cancel = "Cancel", bool danger = false)
     {
         try
         {

@@ -16,18 +16,18 @@ public sealed class KeysPage : PageBase
 
     public KeysPage()
     {
-        var head = Ui.Header("按键", "自定义耳机触控手势。修改任一选项会立即写入耳机。");
+        var head = Ui.Header("Controls", "Customize the headset's touch gestures. Changes are written to the headset immediately.");
         Root.Children.Add(head);
         var bar = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 0, 0, 8) };
-        bar.Children.Add(Ui.Btn("从耳机读取", W.SymbolRegular.ArrowSync24, () => C.ReadKeys()));
+        bar.Children.Add(Ui.Btn("Read from headset", W.SymbolRegular.ArrowSync24, () => C.ReadKeys()));
         Root.Children.Add(bar);
         Root.Children.Add(_grid);
 
-        _disBox.Children.Add(Ui.Section("禁用触控"));
+        _disBox.Children.Add(Ui.Section("Disable touch controls"));
         _disL = Ui.Toggle(User<bool>(_ => C.SetDisableKeys(_disL!.IsChecked == true, _disR!.IsChecked == true)));
         _disR = Ui.Toggle(User<bool>(_ => C.SetDisableKeys(_disL!.IsChecked == true, _disR!.IsChecked == true)));
-        _disBox.Children.Add(Ui.Row(W.SymbolRegular.Dismiss24, "禁用左耳触控", "防止佩戴或调整时误触", _disL));
-        _disBox.Children.Add(Ui.Row(W.SymbolRegular.Dismiss24, "禁用右耳触控", "防止佩戴或调整时误触", _disR));
+        _disBox.Children.Add(Ui.Row(W.SymbolRegular.Dismiss24, "Disable left earbud controls", "Prevent accidental touches while wearing or adjusting the earbud", _disL));
+        _disBox.Children.Add(Ui.Row(W.SymbolRegular.Dismiss24, "Disable right earbud controls", "Prevent accidental touches while wearing or adjusting the earbud", _disR));
         Root.Children.Add(_disBox);
         Guard(() => { OnModel(); OnAll(); });
     }
@@ -39,8 +39,8 @@ public sealed class KeysPage : PageBase
         if (m == null) return;
         _ops = m.KeyOps;
         bool head = !m.IsQcc && m.Variant == "head";
-        var sides = head ? new[] { ("PLUS", "音量 + 键"), ("MINUS", "音量 - 键"), ("NC", "降噪键") } : new[] { ("L", "左耳"), ("R", "右耳") };
-        var gests = head ? new[] { ("ONE", "单击"), ("LONG", "长按") } : Catalog.GESTURES;
+        var sides = head ? new[] { ("PLUS", "Volume + button"), ("MINUS", "Volume - button"), ("NC", "Noise control button") } : new[] { ("L", "Left earbud"), ("R", "Right earbud") };
+        var gests = head ? new[] { ("ONE", "Single press"), ("LONG", "Long press") } : Catalog.GESTURES;
         _grid.Columns = sides.Length;
         foreach (var (sk, st) in sides)
         {
@@ -85,7 +85,7 @@ public sealed class KeysPage : PageBase
                 else
                 {
                     RemoveExtra(cb);
-                    cb.Items.Add(Catalog.OpLabel(kv.Value) + "（当前）");
+                    cb.Items.Add(Catalog.OpLabel(kv.Value) + " (current)");
                     cb.SelectedIndex = cb.Items.Count - 1;
                 }
             }

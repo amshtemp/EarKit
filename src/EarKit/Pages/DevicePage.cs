@@ -20,29 +20,29 @@ public sealed class DevicePage : PageBase
 
     public DevicePage()
     {
-        Root.Children.Add(Ui.Header("耳机设置", "调整耳机的常规设置。不同型号支持的功能不同，这里只显示当前型号支持的项目。"));
+        Root.Children.Add(Ui.Header("Headset Settings", "Adjust general headset settings. Available features vary by model; only supported options are shown."));
 
         _ear = Ui.Toggle(User<bool>(v => C.SetEar(v)));
-        _rEar = Ui.Row(W.SymbolRegular.Headphones24, "入耳检测", "摘下耳机时自动暂停播放", _ear);
+        _rEar = Ui.Row(W.SymbolRegular.Headphones24, "In-ear detection", "Automatically pause playback when you remove an earbud", _ear);
 
-        _pvol = Ui.Combo(Catalog.PROMPT_VOL.Select(v => v == 0 ? "静音" : v + "%"), 140);
+        _pvol = Ui.Combo(Catalog.PROMPT_VOL.Select(v => v == 0 ? "Mute" : v + "%"), 140);
         _pvol.SelectionChanged += (_, _) => { if (!Sync && _pvol.SelectedIndex >= 0) C.SetPrompt(Catalog.PROMPT_VOL[_pvol.SelectedIndex]); };
-        _rPvol = Ui.Row(W.SymbolRegular.Speaker224, "提示音音量", "开关机、连接等语音提示的音量", _pvol);
+        _rPvol = Ui.Row(W.SymbolRegular.Speaker224, "Prompt volume", "Volume of voice prompts for power, connection, and other events", _pvol);
 
         _ao = Ui.Combo(Array.Empty<string>(), 140);
         _ao.SelectionChanged += (_, _) => { if (!Sync && _ao.SelectedIndex >= 0 && _ao.SelectedIndex < _aoList.Count) C.SetAutoOff(_aoList[_ao.SelectedIndex]); };
-        _rAo = Ui.Row(W.SymbolRegular.Power24, "自动关机", "无连接一段时间后自动关机", _ao);
+        _rAo = Ui.Row(W.SymbolRegular.Power24, "Auto power-off", "Turn off automatically after remaining disconnected for a while", _ao);
 
-        _mic = Ui.Combo(new[] { "自动", "仅左耳", "仅右耳" }, 140);
+        _mic = Ui.Combo(new[] { "Automatic", "Left earbud only", "Right earbud only" }, 140);
         _mic.SelectionChanged += (_, _) => { if (!Sync && _mic.SelectedIndex >= 0) C.SetMic(new[] { "AUTO", "L", "R" }[_mic.SelectedIndex]); };
-        _rMic = Ui.Row(W.SymbolRegular.Mic24, "通话麦克风", "选择通话时使用的麦克风", _mic);
+        _rMic = Ui.Row(W.SymbolRegular.Mic24, "Call microphone", "Choose which microphone to use during calls", _mic);
 
         var q = new WrapPanel();
         q.Children.Add(_ldac); q.Children.Add(_aptx); q.Children.Add(_adapt); q.Children.Add(_lossless);
-        var apply = Ui.Btn("应用", W.SymbolRegular.Save24, async () =>
+        var apply = Ui.Btn("Apply", W.SymbolRegular.Save24, async () =>
         {
             if (_ldac.IsChecked == true && C.Get<bool>("dual") && C.Dual.Ldac &&
-                !await Ui.Confirm("LDAC 与多设备连接冲突", "开启 LDAC 时该型号无法使用多设备连接，耳机可能会自动关闭多设备连接。是否继续？", "继续")) return;
+                !await Ui.Confirm("LDAC conflicts with multipoint", "This model cannot use multipoint while LDAC is enabled, and the headset may turn multipoint off automatically. Continue?", "Continue")) return;
             C.SetQuality(_ldac.IsChecked == true, _aptx.IsChecked == true, _adapt.IsChecked == true, _lossless.IsChecked == true);
         }, W.ControlAppearance.Primary);
         _codecNow = Ui.T("", "Hint");
@@ -53,29 +53,29 @@ public sealed class DevicePage : PageBase
         _codecNow.VerticalAlignment = VerticalAlignment.Center; _codecNow.Margin = new Thickness(12, 0, 0, 0);
         qb.Children.Add(_codecNow);
         qp.Children.Add(qb);
-        _rQual = Ui.Row(W.SymbolRegular.SoundWaveCircle24, "高清音频编码", "改动后耳机可能会短暂断开重连。实际使用的编码还取决于电脑/手机是否支持。", null, qp);
+        _rQual = Ui.Row(W.SymbolRegular.SoundWaveCircle24, "High-quality audio codecs", "The headset may briefly disconnect and reconnect after a change. The codec used also depends on support from your computer or phone.", null, qp);
 
         _findL = Ui.Toggle(User<bool>(_ => C.SetFind(_findL!.IsChecked == true, _findR!.IsChecked == true)));
         _findR = Ui.Toggle(User<bool>(_ => C.SetFind(_findL!.IsChecked == true, _findR!.IsChecked == true)));
         var fp = new StackPanel { Orientation = Orientation.Horizontal };
-        fp.Children.Add(new TextBlock { Text = "左耳响铃", VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(0, 0, 8, 0) });
+        fp.Children.Add(new TextBlock { Text = "Ring left", VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(0, 0, 8, 0) });
         fp.Children.Add(_findL);
-        fp.Children.Add(new TextBlock { Text = "右耳响铃", VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(24, 0, 8, 0) });
+        fp.Children.Add(new TextBlock { Text = "Ring right", VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(24, 0, 8, 0) });
         fp.Children.Add(_findR);
-        _rFind = Ui.Row(W.SymbolRegular.Search24, "查找耳机", "耳机会发出提示音，请勿佩戴！", fp);
+        _rFind = Ui.Row(W.SymbolRegular.Search24, "Find headset", "The headset will play a tone. Do not wear it while ringing.", fp);
 
-        var reset = Ui.Btn("恢复出厂设置…", W.SymbolRegular.ArrowReset24, async () =>
+        var reset = Ui.Btn("Factory reset…", W.SymbolRegular.ArrowReset24, async () =>
         {
-            if (await Ui.Confirm("恢复出厂设置", "确定要把耳机恢复出厂设置吗？\n耳机会断开并清除配对和所有设置。", "恢复出厂", danger: true))
+            if (await Ui.Confirm("Factory reset", "Are you sure you want to reset the headset?\nIt will disconnect and erase all pairings and settings.", "Reset", danger: true))
                 C.ResetFactory();
         }, W.ControlAppearance.Danger);
-        _rReset = Ui.Row(W.SymbolRegular.Warning24, "恢复出厂设置", "清除耳机的所有设置和配对记录", reset);
+        _rReset = Ui.Row(W.SymbolRegular.Warning24, "Factory reset", "Erase all headset settings and pairing records", reset);
 
-        Root.Children.Add(Ui.Section("常规"));
+        Root.Children.Add(Ui.Section("General"));
         foreach (var r in new[] { _rEar, _rPvol, _rAo, _rMic }) Root.Children.Add(r);
-        Root.Children.Add(Ui.Section("音质"));
+        Root.Children.Add(Ui.Section("Audio quality"));
         Root.Children.Add(_rQual);
-        Root.Children.Add(Ui.Section("其他"));
+        Root.Children.Add(Ui.Section("Other"));
         Root.Children.Add(_rFind);
         Root.Children.Add(_rReset);
         Guard(() => { OnModel(); OnAll(); });
@@ -108,6 +108,6 @@ public sealed class DevicePage : PageBase
             _adapt.IsChecked = C.Get<bool>("adaptive"); _lossless.IsChecked = C.Get<bool>("lossless");
         }
         if (has("find_l") || has("find_r")) { _findL.IsChecked = C.Get<bool>("find_l"); _findR.IsChecked = C.Get<bool>("find_r"); }
-        if (has("codec")) _codecNow.Text = C.TryGet<string>("codec", out var c) ? $"当前编码：{c}" : "";
+        if (has("codec")) _codecNow.Text = C.TryGet<string>("codec", out var c) ? $"Current codec: {c}" : "";
     }
 }

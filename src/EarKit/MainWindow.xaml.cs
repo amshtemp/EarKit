@@ -30,15 +30,15 @@ public partial class MainWindow : FluentWindow
         bool conn() => C.Model != null;
         _defs = new()
         {
-            new("overview", "概览", SymbolRegular.Home24, () => true, () => new OverviewPage()),
-            new("noise", "降噪", SymbolRegular.HeadphonesSoundWave24, () => conn() && C.Has("noise") && C.Model!.Noise.Count > 0, () => new NoisePage()),
-            new("eq", "均衡器", SymbolRegular.SoundWaveCircle24, () => conn() && C.Has("eq"), () => new EqPage()),
-            new("keys", "按键", SymbolRegular.Keyboard24, () => conn() && C.Has("keys"), () => new KeysPage()),
-            new("multi", "多设备连接", SymbolRegular.PhoneLaptop24, () => conn() && C.Has("dual"), () => new MultiPage()),
-            new("device", "耳机设置", SymbolRegular.Headphones24, () => conn() && new[] { "ear", "prompt", "autooff", "mic", "quality", "find", "reset" }.Any(C.Has), () => new DevicePage()),
-            new("app", "应用设置", SymbolRegular.Settings24, () => true, () => new AppPage()),
-            new("_adv", "高级", SymbolRegular.Options24, () => true, () => null!),
-            new("log", "调试日志", SymbolRegular.WindowDevTools24, () => true, () => new LogPage()),
+            new("overview", "Overview", SymbolRegular.Home24, () => true, () => new OverviewPage()),
+            new("noise", "Noise Control", SymbolRegular.HeadphonesSoundWave24, () => conn() && C.Has("noise") && C.Model!.Noise.Count > 0, () => new NoisePage()),
+            new("eq", "Equalizer", SymbolRegular.SoundWaveCircle24, () => conn() && C.Has("eq"), () => new EqPage()),
+            new("keys", "Controls", SymbolRegular.Keyboard24, () => conn() && C.Has("keys"), () => new KeysPage()),
+            new("multi", "Multipoint", SymbolRegular.PhoneLaptop24, () => conn() && C.Has("dual"), () => new MultiPage()),
+            new("device", "Headset Settings", SymbolRegular.Headphones24, () => conn() && new[] { "ear", "prompt", "autooff", "mic", "quality", "find", "reset" }.Any(C.Has), () => new DevicePage()),
+            new("app", "Application Settings", SymbolRegular.Settings24, () => true, () => new AppPage()),
+            new("_adv", "Advanced", SymbolRegular.Options24, () => true, () => null!),
+            new("log", "Debug Log", SymbolRegular.WindowDevTools24, () => true, () => new LogPage()),
         };
         foreach (var d in _defs)
         {
@@ -87,7 +87,7 @@ public partial class MainWindow : FluentWindow
         {
             var d = _defs.First(x => x.Key == key);
             try { page = d.Make(); }
-            catch (Exception ex) { CrashLog.Write("page " + key, ex); page = new UserControl { Content = Ui.T("页面加载失败：" + ex.Message) }; }
+            catch (Exception ex) { CrashLog.Write("page " + key, ex); page = new UserControl { Content = Ui.T("Failed to load page: " + ex.Message) }; }
             _pages[key] = page;
         }
         Scroller.VerticalScrollBarVisibility = key == "log" ? ScrollBarVisibility.Disabled : ScrollBarVisibility.Auto;
@@ -113,7 +113,7 @@ public partial class MainWindow : FluentWindow
         if (pref != null) DeviceBox.SelectedItem = pref;
         if (C.Devices.Count == 0)
         {
-            DeviceBox.Items.Add(AppSettings.Current.UseCom ? "未找到蓝牙 COM 口" : "未找到已配对的蓝牙设备");
+            DeviceBox.Items.Add(AppSettings.Current.UseCom ? "No Bluetooth COM ports found" : "No paired Bluetooth devices found");
             DeviceBox.SelectedIndex = 0;
         }
     }
@@ -128,14 +128,14 @@ public partial class MainWindow : FluentWindow
         RefreshBtn.IsEnabled = DeviceBox.IsEnabled;
         if (connected)
         {
-            ConnectBtn.Content = "断开";
+            ConnectBtn.Content = "Disconnect";
             ConnectBtn.Icon = new SymbolIcon { Symbol = SymbolRegular.PlugDisconnected24 };
             ConnectBtn.Appearance = ControlAppearance.Secondary;
             ConnIcon.Symbol = SymbolRegular.BluetoothConnected24;
         }
         else
         {
-            ConnectBtn.Content = st == ConnState.Connecting ? "连接中…" : "连接";
+            ConnectBtn.Content = st == ConnState.Connecting ? "Connecting…" : "Connect";
             ConnectBtn.Icon = new SymbolIcon { Symbol = SymbolRegular.PlugConnected24 };
             ConnectBtn.Appearance = ControlAppearance.Primary;
             ConnIcon.Symbol = st == ConnState.Connecting ? SymbolRegular.BluetoothSearching24 : SymbolRegular.Bluetooth24;
@@ -151,7 +151,7 @@ public partial class MainWindow : FluentWindow
         string B(string k) => C.TryGet<int>(k, out var v) && v >= 0 && v <= 100 ? v + "%" : "--";
         if (!C.IsConnected || C.Model == null) { NavBattery.Text = C.IsConnected ? "" : ""; NavBattery.Visibility = Visibility.Collapsed; return; }
         NavBattery.Visibility = Visibility.Visible;
-        NavBattery.Text = C.Model.IsHead ? $"电量 {B("bat_l")}" : $"左 {B("bat_l")}  右 {B("bat_r")}  盒 {B("bat_box")}";
+        NavBattery.Text = C.Model.IsHead ? $"Battery {B("bat_l")}" : $"L {B("bat_l")}  R {B("bat_r")}  Case {B("bat_box")}";
     }
 
     async void Refresh_Click(object sender, RoutedEventArgs e)
@@ -165,7 +165,7 @@ public partial class MainWindow : FluentWindow
         if (C.IsConnected) { C.Disconnect(user: true); return; }
         if (DeviceBox.SelectedItem is not DeviceEntry ent)
         {
-            AddNotice("请选择设备", "请先在 Windows 蓝牙设置中配对耳机，然后点击刷新按钮。", NoticeKind.Warning);
+            AddNotice("Select a device", "Pair the headset in Windows Bluetooth settings, then click Refresh.", NoticeKind.Warning);
             return;
         }
         var s = AppSettings.Current;
@@ -199,7 +199,7 @@ public partial class MainWindow : FluentWindow
             if (!AppSettings.Current.TrayHintShown)
             {
                 AppSettings.Current.TrayHintShown = true; AppSettings.Save();
-                App.Tray?.Show("EarKit 仍在后台运行", "单击托盘图标可重新打开窗口；右键可快速切换降噪或退出。可在“应用设置”中关闭此行为。");
+                App.Tray?.Show("EarKit is still running", "Click the tray icon to reopen the window, or right-click to change noise control or exit. You can turn this off in Application Settings.");
             }
             return;
         }

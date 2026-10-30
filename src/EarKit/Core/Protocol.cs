@@ -3,11 +3,11 @@ namespace EarKit.Core;
 
 public sealed record PhoneInfo(int Num, string Name, string Mac, int State)
 {
-    public bool Connected => State == 1;   // 真机实测：connectState == 1 表示当前已连接
+    public bool Connected => State == 1;   // Verified on hardware: connectState == 1 means currently connected.
 }
 public sealed record PlayInfo(string Mac, int Play);
 
-/// <summary>状态更新集合：键名与早期原型保持一致（bat_l / noise / keys ...）</summary>
+/// <summary>State update collection. Keys match the early prototype (bat_l / noise / keys ...).</summary>
 public sealed class StateUpdate : Dictionary<string, object> { }
 
 public abstract class Proto
@@ -46,7 +46,7 @@ public abstract class Proto
     public abstract (string Desc, StateUpdate S) Parse(byte[] f);
     public abstract (List<byte[]> Frames, byte[] Remain) SplitFrames(byte[] buf);
 
-    /// 按键位置布局：(side, gesture)
+    /// Control layout: (side, gesture).
     public virtual List<(string Side, string Gesture)> KeyLayout()
     {
         var l = new List<(string, string)>();
@@ -56,7 +56,7 @@ public abstract class Proto
     public static string KK(string side, string g) => side + "." + g;
 }
 
-// ============================== 高通 GAIA ==============================
+// ============================== Qualcomm GAIA ==============================
 public sealed class QccProto : Proto
 {
     public override string Family => "qcc";
@@ -223,15 +223,15 @@ public sealed class QccProto : Proto
     {
         var s = new StateUpdate();
         int hl = (f[2] & 2) != 0 ? 5 : 4;
-        if (f.Length < hl + 2) return ("短帧", s);
+        if (f.Length < hl + 2) return ("Short frame", s);
         int vendor = (f[hl] << 8) | f[hl + 1];
         var b = f[(hl + 2)..];
         if (vendor != 0x000A || b.Length < 2) return ($"GAIA vendor {vendor:X4} cmd {Hex(Slice(b, 0, 2))}", s);
-        if (b[0] != 0x83 && b[0] != 0x03) return ($"通知/其他 {Hex(b)}", s);
+        if (b[0] != 0x83 && b[0] != 0x03) return ($"Notification/other {Hex(b)}", s);
         int cid = b[1];
         int? st = b.Length > 2 ? b[2] : null;
         int? valN = b.Length > 3 ? b[3] : null;
-        if (st is not null && st != 0 && b.Length <= 3) return ($"命令 {cid} 返回状态 {st}", s);
+        if (st is not null && st != 0 && b.Length <= 3) return ($"Command {cid} returned status {st}", s);
         if (cid == VER) { s["version"] = System.Text.Encoding.UTF8.GetString(Slice(b, 3)).Trim('\0'); return ("", s); }
         if (cid == DEVLIST && b.Length >= 29)
         {
@@ -239,7 +239,7 @@ public sealed class QccProto : Proto
             return ("", s);
         }
         if (cid == PLAYLIST && b.Length >= 7) { s["play"] = new PlayInfo(Convert.ToHexString(b[3..6]), b[6]); return ("", s); }
-        if (valN is null) return ($"命令 {cid} 已确认", s);
+        if (valN is null) return ($"Command {cid} acknowledged", s);
         int val = valN.Value;
         switch (cid)
         {
@@ -277,7 +277,7 @@ public sealed class QccProto : Proto
                     if (p < b.Length) keys[KK(side, g)] = KEYINV.TryGetValue(b[p], out var op) ? op : $"0x{b[p]:X2}";
                 s["keys"] = keys;
                 break;
-            default: return ($"命令 {cid} 数据 {Hex(Slice(b, 2))}", s);
+            default: return ($"Command {cid} data {Hex(Slice(b, 2))}", s);
         }
         return ("", s);
     }
@@ -322,7 +322,7 @@ public sealed class EfProto : Proto
         if (v == "tw230") { _km.Remove("DOUBLE_CONNECT"); _km["SPATIAL_MODE"] = 12; _km["AMBIENT_NORMAL"] = 14; _km["ANC_AMBIENT"] = 15; }
         else if (v is "cw100" or "cw200") { _km.Remove("DOUBLE_CONNECT"); _km["BASS_EHANCEMENT"] = 12; _km["MANNER_MODE"] = 13; }
         _kinv = new();
-        foreach (var kv in _km) _kinv[kv.Value] = kv.Key;   // 后写覆盖
+        foreach (var kv in _km) _kinv[kv.Value] = kv.Key;   // Later entries take precedence.
         if (v == "tw230") { _noiseSet = new() { ["normal"] = 1, ["ambient"] = 2, ["anc"] = 3 }; }
         else if (v == "head") { _noiseSet = new() { ["normal"] = 1, ["ambient"] = 2, ["wind"] = 3, ["anc2"] = 4, ["anc1"] = 5 }; }
         else { _noiseSet = new() { ["normal"] = 1, ["ambient"] = 2, ["wind"] = 3, ["anc"] = 4, ["adaptive"] = 5 }; }
@@ -475,7 +475,7 @@ public sealed class EfProto : Proto
             s["phone"] = new PhoneInfo(p[0], CStr(p[1..20]), Convert.ToHexString(p[21..25]), p[25]);
             return ("", s);
         }
-        if (v0n is null) return ($"{name} 已确认", s);
+        if (v0n is null) return ($"{name} acknowledged", s);
         int v0 = v0n.Value;
         if (Is("BAT")) { s["bat_l"] = (int)p[0]; if (M.Battery == "tws" && p.Length > 1) s["bat_r"] = (int)p[1]; }
         else if (Is("BOX")) s["bat_box"] = v0;
@@ -503,7 +503,7 @@ public sealed class EfProto : Proto
             foreach (var kv in keys) Keys[kv.Key] = kv.Value;
             s["keys"] = keys;
         }
-        else return ($"{name} 数据 {Hex(p)}", s);
+        else return ($"{name} data {Hex(p)}", s);
         return ("", s);
     }
 }

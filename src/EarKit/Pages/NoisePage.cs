@@ -13,15 +13,15 @@ public sealed class NoisePage : PageBase
 
     public NoisePage()
     {
-        Root.Children.Add(Ui.Header("降噪", "切换降噪 / 通透模式，并调整降噪强度与通透效果。"));
-        Root.Children.Add(Ui.Section("模式"));
+        Root.Children.Add(Ui.Header("Noise Control", "Switch between noise cancellation and ambient modes, then adjust their levels."));
+        Root.Children.Add(Ui.Section("Mode"));
         Root.Children.Add(_modes);
-        _subBox.Children.Add(Ui.Section("降噪强度"));
-        _subBox.Children.Add(Ui.T("在“降噪”模式下生效。", "Hint"));
+        _subBox.Children.Add(Ui.Section("Noise cancellation level"));
+        _subBox.Children.Add(Ui.T("Applies in Noise Cancellation mode.", "Hint"));
         _subs.Margin = new Thickness(0, 8, 0, 0);
         _subBox.Children.Add(_subs);
-        _ambBox.Children.Add(Ui.Section("通透效果"));
-        _ambBox.Children.Add(Ui.T("在“通透”模式下生效。", "Hint"));
+        _ambBox.Children.Add(Ui.Section("Ambient level"));
+        _ambBox.Children.Add(Ui.T("Applies in Ambient mode.", "Hint"));
         _ambs.Margin = new Thickness(0, 8, 0, 0);
         _ambBox.Children.Add(_ambs);
         Root.Children.Add(_subBox);

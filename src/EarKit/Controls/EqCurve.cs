@@ -3,7 +3,7 @@ using System.Windows;
 using System.Windows.Media;
 namespace EarKit.Controls;
 
-/// EQ 曲线预览（Catmull-Rom 平滑）
+/// EQ curve preview (Catmull-Rom smoothing)
 public sealed class EqCurve : FrameworkElement
 {
     double[] _vals = new double[10];
@@ -18,7 +18,7 @@ public sealed class EqCurve : FrameworkElement
     public Brush GridBrush { get => (Brush)GetValue(GridBrushProperty); set => SetValue(GridBrushProperty, value); }
     public Brush TextBrush { get => (Brush)GetValue(TextBrushProperty); set => SetValue(TextBrushProperty, value); }
 
-    /// 设置各频段 dB 值与量程
+    /// Set the dB values and range for each frequency band.
     public void SetValues(double[] db, double maxAbs) { _vals = db.ToArray(); _max = Math.Max(1, maxAbs); InvalidateVisual(); }
 
     protected override void OnRender(DrawingContext dc)

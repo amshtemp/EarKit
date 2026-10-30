@@ -20,7 +20,7 @@ public abstract class PageBase : UserControl
         Loaded += (_, _) => Guard(OnAll);
     }
 
-    /// 在更新界面时屏蔽控件事件，避免回写耳机
+    /// Suppress control events during UI updates to avoid writing changes back to the headset.
     protected void Guard(Action a)
     {
         bool old = Sync; Sync = true;
@@ -29,7 +29,7 @@ public abstract class PageBase : UserControl
         finally { Sync = old; }
     }
 
-    /// 只有用户操作（非程序同步）时才执行
+    /// Run only for user actions, not programmatic synchronization.
     protected Action<T> User<T>(Action<T> a) => v => { if (!Sync) a(v); };
     protected Action User(Action a) => () => { if (!Sync) a(); };
 

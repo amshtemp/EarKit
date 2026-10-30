@@ -13,17 +13,17 @@ public sealed class AppSettings
 {
     public string Theme { get; set; } = "system";          // system / light / dark
     public string Backdrop { get; set; } = "mica";         // mica / acrylic / tabbed / none
-    public int BackdropOpacity { get; set; } = 75;         // 背景色覆盖不透明度 0–100
-    public bool StartMinimized { get; set; } = true;       // 开机自启时最小化到托盘
+    public int BackdropOpacity { get; set; } = 75;         // Background overlay opacity, 0-100
+    public bool StartMinimized { get; set; } = true;       // Start minimized to the tray
     public bool CloseToTray { get; set; } = true;
     public bool AutoConnect { get; set; } = true;
     public string? LastMac { get; set; }
     public string? LastName { get; set; }
     public string? LastCom { get; set; }
-    public string ManualModel { get; set; } = "";          // 空 = 自动识别
-    public bool UseCom { get; set; }                       // 高级：经蓝牙串口 COM 连接
+    public string ManualModel { get; set; } = "";          // Empty means automatic detection
+    public bool UseCom { get; set; }                       // Advanced: connect through a Bluetooth serial COM port
     public string? ComPort { get; set; }
-    public int RfcommChannel { get; set; }                 // 0 = 自动
+    public int RfcommChannel { get; set; }                 // 0 = automatic
     public bool LowBatteryAlert { get; set; } = true;
     public int LowBatteryThreshold { get; set; } = 20;
     public bool HotkeyEnabled { get; set; } = true;
@@ -55,7 +55,7 @@ public sealed class AppSettings
         catch { Current = new AppSettings(); }
     }
 
-    /// 从旧名称 “Earfun Tools” 迁移设置（%AppData%\EarfunTools → %AppData%\EarKit）
+    /// Migrate settings from the old name “Earfun Tools” (%AppData%\EarfunTools -> %AppData%\EarKit).
     static void Migrate()
     {
         try
@@ -76,7 +76,7 @@ public sealed class AppSettings
     }
 
     static System.Windows.Threading.DispatcherTimer? _t;
-    /// 合并 500ms 内的多次保存
+    /// Coalesce multiple saves within 500 ms.
     public static void Save()
     {
         if (System.Windows.Application.Current?.Dispatcher is { } d && d.CheckAccess())
@@ -107,7 +107,7 @@ public static class AutoStart
     const string RunKey = @"Software\Microsoft\Windows\CurrentVersion\Run";
     const string Name = "EarKit";
     const string LegacyName = "Earfun Tools";
-    /// 旧版的开机自启项改写为新名称和当前路径
+    /// Update the legacy startup entry to the new name and current path.
     public static void MigrateLegacy()
     {
         try

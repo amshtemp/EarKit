@@ -6,7 +6,7 @@ public enum ConnState { Disconnected, Connecting, Connected, Error }
 public sealed record LogEntry(DateTime Time, string Dir, byte[]? Data, string Text);
 public enum NoticeKind { Info, Success, Warning, Error }
 
-/// 设备控制中心：所有方法与事件均在 UI 线程上运行
+/// Central device controller; all methods and events run on the UI thread.
 public sealed class DeviceController
 {
     public static DeviceController I { get; private set; } = null!;
@@ -18,10 +18,10 @@ public sealed class DeviceController
     public Proto? Proto => Sess?.Proto;
     public bool IsConnected => Sess != null && Sess.Alive;
     public ConnState Conn { get; private set; } = ConnState.Disconnected;
-    public string StatusText { get; private set; } = "未连接";
+    public string StatusText { get; private set; } = "Not connected";
     public string? Firmware { get; private set; }
     public string? LinkDesc { get; private set; }
-    public string? ProtocolName => Model == null ? null : Model.IsQcc ? "高通 GAIA" : "EarFun EF";
+    public string? ProtocolName => Model == null ? null : Model.IsQcc ? "Qualcomm GAIA" : "EarFun EF";
     public readonly Dictionary<string, object> State = new();
     public readonly Dictionary<string, PhoneInfo> Phones = new();
     public readonly Dictionary<string, int> Plays = new();
@@ -34,8 +34,8 @@ public sealed class DeviceController
     public event Action? DevicesChanged;
     public event Action? PhonesChanged;
     public event Action<LogEntry>? Logged;
-    public event Action<string, string, NoticeKind>? Notice;      // 标题, 内容
-    public event Action<string, string>? TrayNotice;              // 仅托盘气泡
+    public event Action<string, string, NoticeKind>? Notice;      // Title and message
+    public event Action<string, string>? TrayNotice;              // Tray notification only
     public event Action? PairingChanged;
 
     public bool UnlockAll => S.UnlockAll;
@@ -64,11 +64,11 @@ public sealed class DeviceController
         _watch.Tick += (_, _) => AutoConnectTick();
     }
 
-    // ------------------------------------------------------------ 工具
+    // ------------------------------------------------------------ Utilities
     DispatcherTimer Later(int ms, Action a)
     {
         var t = new DispatcherTimer(DispatcherPriority.Normal, _d) { Interval = TimeSpan.FromMilliseconds(Math.Max(1, ms)) };
-        t.Tick += (_, _) => { t.Stop(); try { a(); } catch (Exception e) { CrashLog.Write("timer", e); Log("!!", null, "内部错误：" + e.Message); } };
+        t.Tick += (_, _) => { t.Stop(); try { a(); } catch (Exception e) { CrashLog.Write("timer", e); Log("!!", null, "Internal error: " + e.Message); } };
         t.Start();
         return t;
     }
@@ -90,7 +90,7 @@ public sealed class DeviceController
     }
     void Note(string title, string msg, NoticeKind k = NoticeKind.Info) => Notice?.Invoke(title, msg, k);
 
-    // ------------------------------------------------------------ 设备列表
+    // ------------------------------------------------------------ Device list
     public async Task RefreshDevicesAsync()
     {
         try
@@ -102,9 +102,9 @@ public sealed class DeviceController
                 { Com = p.Port, Mac = p.Mac, Name = p.Mac != null && reg.TryGetValue(p.Mac, out var n) ? n : "" }).ToList();
             }
             else Devices = await Discovery.ListAsync();
-            Log("--", null, S.UseCom ? $"发现 {Devices.Count} 个蓝牙 COM 口" : $"发现 {Devices.Count} 个已配对的蓝牙设备");
+            Log("--", null, S.UseCom ? $"Found {Devices.Count} Bluetooth COM port(s)" : $"Found {Devices.Count} paired Bluetooth device(s)");
         }
-        catch (Exception e) { Log("!!", null, "枚举设备失败：" + e.Message); }
+        catch (Exception e) { Log("!!", null, "Failed to enumerate devices: " + e.Message); }
         DevicesChanged?.Invoke();
     }
 
@@ -116,7 +116,7 @@ public sealed class DeviceController
             ?? Devices.FirstOrDefault(e => e.IsEarfun) ?? Devices[0];
     }
 
-    // ------------------------------------------------------------ 连接
+    // ------------------------------------------------------------ Connection
     public void StartAutoConnect()
     {
         _watch.Start();
@@ -131,7 +131,7 @@ public sealed class DeviceController
         if (!S.UseCom && S.LastMac != null)
         {
             var c = await Discovery.IsConnectedAsync(S.LastMac);
-            if (c != true) return;     // 耳机不在线时不尝试，避免打扰
+            if (c != true) return;     // Avoid attempting to connect when the headset is offline.
         }
         if (IsConnected || Conn == ConnState.Connecting) return;
         var ent = new DeviceEntry { Mac = S.LastMac, Name = S.LastName ?? "", Com = S.UseCom ? S.LastCom : null };
@@ -146,8 +146,8 @@ public sealed class DeviceController
         _lastEntry = ent; _lastManual = manual; _lastCh = channel;
         var chip = Catalog.UnsupportedChip(ent.Name);
         if (chip != null && !quiet)
-            Note("型号可能不受支持", $"“{ent.Name}”在官方 App 中使用 {chip} 方案，协议不同，本工具可能无法控制。仍会尝试连接。", NoticeKind.Warning);
-        SetStatus(ConnState.Connecting, "正在连接…");
+            Note("Model may not be supported", $"“{ent.Name}” uses the {chip} platform in the official app, which uses a different protocol. EarKit may not be able to control it. A connection will still be attempted.", NoticeKind.Warning);
+        SetStatus(ConnState.Connecting, "Connecting…");
         _ = DoConnect(ent, manual, channel, quiet);
     }
 
@@ -156,7 +156,7 @@ public sealed class DeviceController
         (ILink? link, string? fam, string? ver, string? err) r;
         try { r = await Task.Run(() => ConnectWorker(ent, ch, quiet)); }
         catch (Exception e) { r = (null, null, null, e.Message); }
-        if (r.link == null) { OnConnectFailed(r.err ?? "无法建立连接", quiet); return; }
+        if (r.link == null) { OnConnectFailed(r.err ?? "Could not establish a connection", quiet); return; }
         try { OnConnected(r.link, ent, manual, r.fam, r.ver); }
         catch (Exception e) { CrashLog.Write("OnConnected", e); r.link.Dispose(); OnConnectFailed(e.Message, quiet); }
     }
@@ -169,24 +169,24 @@ public sealed class DeviceController
 
         if (ent.Com != null)
         {
-            log("--", null, $"打开串口 {ent.Com}");
+            log("--", null, $"Opening serial port {ent.Com}");
             var l = new SerialLink(ent.Com);
             Thread.Sleep(300);
             var (f, v) = Session.ProbeFamily(l, log);
             return Ok(l, f, v);
         }
-        if (ent.Mac == null) return (null, null, null, "未选择设备");
+        if (ent.Mac == null) return (null, null, null, "No device selected");
         ulong addr = Util.ParseMac(ent.Mac);
 
         ILink? Try(Func<ILink> mk, string what, out string? fam, out string? ver)
         {
             fam = ver = null;
             ILink? l;
-            try { log("--", null, $"尝试 {what} …"); l = mk(); }
-            catch (Exception e) { lastErr = e.Message; log("--", null, $"  {what} 失败：{e.Message}"); return null; }
+            try { log("--", null, $"Trying {what}…"); l = mk(); }
+            catch (Exception e) { lastErr = e.Message; log("--", null, $"  {what} failed: {e.Message}"); return null; }
             (fam, ver) = Session.ProbeFamily(l, log);
             if (fam != null) return l;
-            log("--", null, $"  {what} 已连接但无协议回应");
+            log("--", null, $"  {what} connected, but no protocol response was received");
             l.Dispose();
             return null;
         }
@@ -196,32 +196,32 @@ public sealed class DeviceController
         {
             try
             {
-                log("--", null, $"RFCOMM 直连 {ent.Mac} 通道 {ch}");
+                log("--", null, $"Direct RFCOMM connection to {ent.Mac}, channel {ch}");
                 var l = new BthSocketLink(addr, ch, 6000);
                 var (f, v) = Session.ProbeFamily(l, log);
                 return Ok(l, f, v);
             }
-            catch (Exception e) { return (null, null, null, $"通道 {ch} 连接失败：{e.Message}"); }
+            catch (Exception e) { return (null, null, null, $"Connection failed on channel {ch}: {e.Message}"); }
         }
-        // 1) Winsock + SPP UUID（由系统查 SDP 得到通道）
-        var link = Try(() => new BthSocketLink(addr, 0, 8000), "SPP 串口服务", out fm, out vr);
+        // 1) Winsock + SPP UUID (the system resolves the channel through SDP).
+        var link = Try(() => new BthSocketLink(addr, 0, 8000), "SPP serial service", out fm, out vr);
         if (link != null) return Ok(link, fm, vr);
-        // 2) WinRT RFCOMM 服务
+        // 2) WinRT RFCOMM services.
         var svcs = Discovery.RfcommServicesAsync(ent.Mac, m => log("--", null, m)).GetAwaiter().GetResult();
         foreach (var s in svcs)
         {
             var desc = $"{ent.Mac} {s.ServiceId.Uuid}";
-            link = Try(() => WinRtLink.ConnectAsync(s, desc).GetAwaiter().GetResult(), $"WinRT 服务 {s.ServiceId.Uuid}", out fm, out vr);
+            link = Try(() => WinRtLink.ConnectAsync(s, desc).GetAwaiter().GetResult(), $"WinRT service {s.ServiceId.Uuid}", out fm, out vr);
             if (link != null) return Ok(link, fm, vr);
         }
-        if (quiet) return (null, null, null, lastErr ?? "无协议回应");
-        // 3) 逐个 RFCOMM 通道扫描
+        if (quiet) return (null, null, null, lastErr ?? "No protocol response");
+        // 3) Scan RFCOMM channels one by one.
         for (int c = 1; c <= 30; c++)
         {
-            link = Try(() => new BthSocketLink(addr, c, 5000), $"RFCOMM 通道 {c}", out fm, out vr);
+            link = Try(() => new BthSocketLink(addr, c, 5000), $"RFCOMM channel {c}", out fm, out vr);
             if (link != null) return Ok(link, fm, vr);
         }
-        return (null, null, null, "无法建立连接。请确认耳机已在 Windows 中配对并处于连接状态，且未被手机 App 占用。" + (lastErr != null ? $"\n（最后错误：{lastErr}）" : ""));
+        return (null, null, null, "Could not connect. Make sure the headset is paired in Windows, is connected, and is not in use by the phone app." + (lastErr != null ? $"\n(Last error: {lastErr})" : ""));
     }
 
     void OnConnectFailed(string err, bool quiet)
@@ -230,13 +230,13 @@ public sealed class DeviceController
         if (_autoRetries > 0)
         {
             _autoRetries--;
-            SetStatus(ConnState.Connecting, $"耳机可能仍在重启，10 秒后再次尝试重连（剩余 {_autoRetries + 1} 次）");
+            SetStatus(ConnState.Connecting, $"The headset may still be restarting. Retrying in 10 seconds ({_autoRetries + 1} attempt(s) remaining)");
             ScheduleReconnect(10000);
             return;
         }
-        if (quiet) { _quietFails++; SetStatus(ConnState.Disconnected, "未连接"); return; }
-        SetStatus(ConnState.Error, "连接失败");
-        Note("连接失败", err, NoticeKind.Error);
+        if (quiet) { _quietFails++; SetStatus(ConnState.Disconnected, "Not connected"); return; }
+        SetStatus(ConnState.Error, "Connection failed");
+        Note("Connection failed", err, NoticeKind.Error);
     }
 
     void OnConnected(ILink link, DeviceEntry ent, Model? manual, string? fam, string? ver)
@@ -245,7 +245,7 @@ public sealed class DeviceController
         Cancel(ref _reconnectJob);
         var model = manual;
         if (fam == null)
-            Log("!!", null, "两种协议都没有回应。可能：COM 口不对 / 耳机未连接 / 被手机 App 占用。仍按所选型号继续，请看日志。");
+            Log("!!", null, "Neither protocol responded. Check that the COM port is correct, the headset is connected, and the phone app is not using it. Continuing with the selected model; see the log.");
         var auto = Catalog.GuessModel(ver) ?? Catalog.GuessModel(ent.Name);
         if (model == null)
         {
@@ -253,14 +253,14 @@ public sealed class DeviceController
             if (model == null)
             {
                 model = Catalog.ByKey(fam != "ef" ? "TW600" : "TW220")!;
-                Log("!!", null, $"未能精确识别型号，按协议族默认使用 {model}，可在“应用设置”中手动指定型号");
-                Note("未能精确识别型号", $"已按协议默认使用 {model.Name}。如功能不对，可在“应用设置 → 连接”中手动指定型号。", NoticeKind.Warning);
+                Log("!!", null, $"Could not identify the exact model. Using the default for this protocol family: {model}. You can select a model manually in Application Settings.");
+                Note("Could not identify exact model", $"Using the protocol's default model, {model.Name}. If features do not work correctly, choose a model manually under Application Settings > Connection.", NoticeKind.Warning);
             }
         }
         else if (fam != null && model.Family != fam)
         {
             var nm = auto != null && auto.Family == fam ? auto : Catalog.ByKey(fam == "qcc" ? "TW600" : "TW220")!;
-            Note("型号与协议不符", $"手动指定的 {model.Name} 与耳机实际应答的协议不一致，已自动改用 {nm.Name}。", NoticeKind.Warning);
+            Note("Model and protocol do not match", $"The manually selected model, {model.Name}, does not match the protocol reported by the headset. Switched to {nm.Name} automatically.", NoticeKind.Warning);
             model = nm;
         }
         State.Clear(); Phones.Clear(); Plays.Clear(); _pending.Clear(); _lowAlerted.Clear();
@@ -272,11 +272,11 @@ public sealed class DeviceController
         SetModelInternal(model);
         S.LastMac = ent.Mac; S.LastName = string.IsNullOrEmpty(ent.Name) ? S.LastName : ent.Name; S.LastCom = ent.Com;
         AppSettings.Save();
-        SetStatus(ConnState.Connected, "已连接");
-        Log("--", null, $"已连接 {link.Desc} · 型号 {model.Name} [{model.Key}] · 协议 {ProtocolName}" + (Firmware != null ? $" · 固件 {Firmware}" : ""));
-        if (S.NotifyConnect) TrayNotice?.Invoke("耳机已连接", model.Name);
+        SetStatus(ConnState.Connected, "Connected");
+        Log("--", null, $"Connected {link.Desc} · Model {model.Name} [{model.Key}] · Protocol {ProtocolName}" + (Firmware != null ? $" · Firmware {Firmware}" : ""));
+        if (S.NotifyConnect) TrayNotice?.Invoke("Headset connected", model.Name);
         var init = Sess.Proto.InitCmds();
-        if (init.Count > 0) Sess.Send(init, "初始化序列");
+        if (init.Count > 0) Sess.Send(init, "Initialization sequence");
         Query(true);
         _poll.Start();
     }
@@ -293,14 +293,14 @@ public sealed class DeviceController
         s?.Dispose();
         _pending.Clear();
         Cancel(ref _confirmJob);
-        if (Conn != ConnState.Connecting || !keepReconnect) SetStatus(ConnState.Disconnected, "未连接");
+        if (Conn != ConnState.Connecting || !keepReconnect) SetStatus(ConnState.Disconnected, "Not connected");
         else ConnectionChanged?.Invoke();
     }
 
     public void Reconnect()
     {
         var ent = _lastEntry ?? PreferredDevice();
-        if (ent == null) { Note("无法重连", "没有可用的设备，请先在 Windows 中配对耳机。", NoticeKind.Warning); return; }
+        if (ent == null) { Note("Cannot reconnect", "No device is available. Pair the headset in Windows first.", NoticeKind.Warning); return; }
         if (IsConnected) Disconnect();
         Connect(ent, _lastEntry != null ? _lastManual : Catalog.ByKey(S.ManualModel), _lastEntry != null ? _lastCh : S.RfcommChannel);
     }
@@ -314,13 +314,13 @@ public sealed class DeviceController
             if (!IsConnected && _lastEntry != null)
             {
                 if (Conn == ConnState.Connecting) Conn = ConnState.Disconnected;
-                Log("--", null, "自动重连…");
+                Log("--", null, "Automatic reconnect…");
                 Connect(_lastEntry, _lastManual, _lastCh, quiet: true);
             }
         });
     }
 
-    // ------------------------------------------------------------ 型号
+    // ------------------------------------------------------------ Model
     void SetModelInternal(Model m)
     {
         Model = m;
@@ -337,7 +337,7 @@ public sealed class DeviceController
         {
             Sess.SetModel(m);
             SetModelInternal(m);
-            Log("--", null, $"手动切换型号为 {m}");
+            Log("--", null, $"Manually switched model to {m}");
             Query(true);
         }
     }
@@ -348,18 +348,18 @@ public sealed class DeviceController
         ModelChanged?.Invoke();
     }
 
-    // ------------------------------------------------------------ 查询 / 下发
+    // ------------------------------------------------------------ Query / send
     public void Query(bool full)
     {
         if (Sess == null || !Sess.Alive) return;
-        Sess.Send(Sess.Proto.Queries(full), full ? "查询" : "");
+        Sess.Send(Sess.Proto.Queries(full), full ? "Query" : "");
         if (full && Model != null && Model.Feats.Contains("dual") && Model.Dual.List) RefreshDevList();
     }
 
     public bool Do(List<byte[]> frames, string note = "", StateUpdate? expect = null)
     {
-        if (Sess == null || !Sess.Alive) { Note("未连接", "请先连接耳机", NoticeKind.Warning); return false; }
-        if (frames.Count == 0) { Log("..", null, $"{note}：该型号协议不支持此操作"); return false; }
+        if (Sess == null || !Sess.Alive) { Note("Not connected", "Connect a headset first", NoticeKind.Warning); return false; }
+        if (frames.Count == 0) { Log("..", null, $"{note}: This operation is not supported by this model's protocol"); return false; }
         Sess.Send(frames, note);
         if (expect != null && expect.Count > 0)
         {
@@ -390,8 +390,8 @@ public sealed class DeviceController
         {
             if (!_pending.TryGetValue(kv.Key, out var p)) { o[kv.Key] = kv.Value; continue; }
             if (Equals(kv.Value, p.Want)) { _pending.Remove(kv.Key); o[kv.Key] = kv.Value; }
-            else if (now < p.Until) Log("..", null, $"{kv.Key} 读到 {kv.Value}，耳机仍在切换到 {p.Want}，暂不刷新界面");
-            else { _pending.Remove(kv.Key); o[kv.Key] = kv.Value; Log("!!", null, $"{kv.Key} 设置为 {p.Want} 后耳机仍报告 {kv.Value}，可能未生效"); }
+            else if (now < p.Until) Log("..", null, $"Read {kv.Key} as {kv.Value}; headset is still switching to {p.Want}, so the UI will not be refreshed yet");
+            else { _pending.Remove(kv.Key); o[kv.Key] = kv.Value; Log("!!", null, $"Headset still reports {kv.Value} after setting {kv.Key} to {p.Want}; the change may not have taken effect"); }
         }
         return o;
     }
@@ -401,16 +401,16 @@ public sealed class DeviceController
         if (s.TryGetValue("_disconnected", out var why))
         {
             if (Sess == null) return;
-            Log("!!", null, "连接已断开：" + why);
+            Log("!!", null, "Connection lost: " + why);
             bool rebooting = _reconnectJob != null;
             Disconnect(keepReconnect: true);
             if (!rebooting && S.AutoConnect && !_userDisconnected && _lastEntry != null)
             {
                 _autoRetries = Math.Max(_autoRetries, 2);
                 ScheduleReconnect(5000);
-                SetStatus(ConnState.Connecting, "连接已断开，稍后自动重连…");
+                SetStatus(ConnState.Connecting, "Connection lost; reconnecting shortly…");
             }
-            TrayNotice?.Invoke("耳机已断开", why?.ToString() ?? "");
+            TrayNotice?.Invoke("Headset disconnected", why?.ToString() ?? "");
             return;
         }
         if (s.ContainsKey("_wrong_family"))
@@ -418,7 +418,7 @@ public sealed class DeviceController
             if (!_wrongFamilyWarned)
             {
                 _wrongFamilyWarned = true;
-                Note("协议不符", $"耳机回应的是{((string)s["_wrong_family"] == "qcc" ? "高通" : "EarFun")}协议帧，型号可能选错了。可在“应用设置”中改为自动识别或手动指定型号。", NoticeKind.Warning);
+                Note("Protocol mismatch", $"The headset responded with a {((string)s["_wrong_family"] == "qcc" ? "Qualcomm" : "EarFun")} protocol frame, so the selected model may be incorrect. Choose automatic detection or select a model manually in Application Settings.", NoticeKind.Warning);
             }
             return;
         }
@@ -429,7 +429,7 @@ public sealed class DeviceController
         bool phones = false;
         if (s.TryGetValue("phone", out var po) && po is PhoneInfo p)
         {
-            if (Model?.Variant == "tw600" && p.Num == 0) Phones.Clear();   // TW600：number==0 时清空列表
+            if (Model?.Variant == "tw600" && p.Num == 0) Phones.Clear();   // TW600: number == 0 clears the list.
             Phones[p.Mac] = p; phones = true;
         }
         if (s.TryGetValue("play", out var pl) && pl is PlayInfo pi) { Plays[pi.Mac] = pi.Play; phones = true; }
@@ -441,12 +441,12 @@ public sealed class DeviceController
     void CheckBattery(StateUpdate s)
     {
         if (!S.LowBatteryAlert || Model == null) return;
-        foreach (var (k, label) in new[] { ("bat_l", Model.IsHead ? "耳机" : "左耳"), ("bat_r", "右耳") })
+        foreach (var (k, label) in new[] { ("bat_l", Model.IsHead ? "Headset" : "Left earbud"), ("bat_r", "Right earbud") })
         {
             if (!s.TryGetValue(k, out var o) || o is not int v || v < 0 || v > 100) continue;
             bool charging = State.TryGetValue(k == "bat_l" ? "chg_l" : "chg_r", out var c) && c is true;
             if (v <= S.LowBatteryThreshold && !charging && _lowAlerted.Add(k))
-                TrayNotice?.Invoke("耳机电量低", $"{Model.Name} {label}电量 {v}%，请及时充电");
+                TrayNotice?.Invoke("Low headset battery", $"{Model.Name} {label} battery is at {v}%. Please charge soon.");
             else if (v > S.LowBatteryThreshold + 5) _lowAlerted.Remove(k);
         }
     }
@@ -458,31 +458,31 @@ public sealed class DeviceController
         val = default!; return false;
     }
 
-    // ------------------------------------------------------------ 常用操作
-    public void SetNoise(string mode) { if (Proto != null) Do(Proto.SetNoise(mode), $"降噪 → {Catalog.NOISE_LABEL.GetValueOrDefault(mode, mode)}", new() { ["noise"] = mode }); }
-    public void SetSub(string sub) { if (Proto != null) Do(Proto.SetSub(sub), $"降噪子模式 → {Catalog.SUB_LABEL.GetValueOrDefault(sub, sub)}", new() { ["sub"] = sub }); }
-    public void SetAmb(string a) { if (Proto != null) Do(Proto.SetAmb(a), $"通透子模式 → {Catalog.AMB_LABEL.GetValueOrDefault(a, a)}", new() { ["amb"] = a }); }
-    public void SetGame(bool on) { if (Proto != null) Do(Proto.SetGame(on), "游戏模式 → " + (on ? "开" : "关"), new() { ["game"] = on }); }
-    public void SetSpatial(bool on) { if (Proto != null) Do(Proto.SetSpatial(on), "空间音频 → " + (on ? "开" : "关"), new() { ["spatial"] = on }); }
-    public void SetEar(bool on) { if (Proto != null) Do(Proto.SetEar(on), "入耳检测 → " + (on ? "开" : "关"), new() { ["ear"] = on }); }
-    public void SetPrompt(int v) { if (Proto != null) Do(Proto.SetPrompt(v), $"提示音音量 → {v}%", new() { ["prompt"] = v }); }
-    public void SetAutoOff(int m) { if (Proto != null) Do(Proto.SetAutoOff(m), $"自动关机 → {Catalog.AutoOffLabel(m)}", new() { ["autooff"] = m }); }
-    public void SetMic(string w) { if (Proto != null) Do(Proto.SetMic(w), $"通话麦克风 → {w}", new() { ["mic"] = w }); }
-    public void SetFind(bool l, bool r) { if (Proto != null) Do(Proto.SetFind(l, r), "查找耳机", new() { ["find_l"] = l, ["find_r"] = r }); }
-    public void SetDisableKeys(bool l, bool r) { if (Proto != null) Do(Proto.SetDisableKeys(l, r), "禁用触控", new() { ["dis_l"] = l, ["dis_r"] = r }); }
+    // ------------------------------------------------------------ Common operations
+    public void SetNoise(string mode) { if (Proto != null) Do(Proto.SetNoise(mode), $"Noise control -> {Catalog.NOISE_LABEL.GetValueOrDefault(mode, mode)}", new() { ["noise"] = mode }); }
+    public void SetSub(string sub) { if (Proto != null) Do(Proto.SetSub(sub), $"Noise control submode -> {Catalog.SUB_LABEL.GetValueOrDefault(sub, sub)}", new() { ["sub"] = sub }); }
+    public void SetAmb(string a) { if (Proto != null) Do(Proto.SetAmb(a), $"Ambient submode -> {Catalog.AMB_LABEL.GetValueOrDefault(a, a)}", new() { ["amb"] = a }); }
+    public void SetGame(bool on) { if (Proto != null) Do(Proto.SetGame(on), "Game mode -> " + (on ? "On" : "Off"), new() { ["game"] = on }); }
+    public void SetSpatial(bool on) { if (Proto != null) Do(Proto.SetSpatial(on), "Spatial audio -> " + (on ? "On" : "Off"), new() { ["spatial"] = on }); }
+    public void SetEar(bool on) { if (Proto != null) Do(Proto.SetEar(on), "In-ear detection -> " + (on ? "On" : "Off"), new() { ["ear"] = on }); }
+    public void SetPrompt(int v) { if (Proto != null) Do(Proto.SetPrompt(v), $"Prompt volume -> {v}%", new() { ["prompt"] = v }); }
+    public void SetAutoOff(int m) { if (Proto != null) Do(Proto.SetAutoOff(m), $"Auto power-off -> {Catalog.AutoOffLabel(m)}", new() { ["autooff"] = m }); }
+    public void SetMic(string w) { if (Proto != null) Do(Proto.SetMic(w), $"Call microphone -> {w}", new() { ["mic"] = w }); }
+    public void SetFind(bool l, bool r) { if (Proto != null) Do(Proto.SetFind(l, r), "Find headset", new() { ["find_l"] = l, ["find_r"] = r }); }
+    public void SetDisableKeys(bool l, bool r) { if (Proto != null) Do(Proto.SetDisableKeys(l, r), "Disable touch controls", new() { ["dis_l"] = l, ["dis_r"] = r }); }
     public void SetQuality(bool ldac, bool aptx, bool adaptive, bool lossless)
     {
-        if (Proto != null) Do(Proto.SetQuality(ldac, aptx, adaptive, lossless), "高清音频编码",
+        if (Proto != null) Do(Proto.SetQuality(ldac, aptx, adaptive, lossless), "High-quality audio codecs",
             new() { ["ldac"] = ldac, ["aptx"] = aptx, ["adaptive"] = adaptive, ["lossless"] = lossless });
     }
-    public void ResetFactory() { if (Proto != null) Do(Proto.Reset(), "恢复出厂"); }
-    public void ReadKeys() { if (Proto != null) Do(Proto.KeyQuery(), "读取按键"); }
+    public void ResetFactory() { if (Proto != null) Do(Proto.Reset(), "Factory reset"); }
+    public void ReadKeys() { if (Proto != null) Do(Proto.KeyQuery(), "Read controls"); }
 
     public void SetKey(string side, string gesture, string op)
     {
         if (Proto == null) return;
         var cur = Get<Dictionary<string, string>>("keys") is { } k ? new Dictionary<string, string>(k) : new Dictionary<string, string>();
-        if (Do(Proto.SetKey(side, gesture, op, cur), $"按键 {side}-{gesture} → {Catalog.OpLabel(op)}"))
+        if (Do(Proto.SetKey(side, gesture, op, cur), $"Control {side}-{gesture} -> {Catalog.OpLabel(op)}"))
         {
             cur[EarKit.Core.Proto.KK(side, gesture)] = op;
             State["keys"] = cur;
@@ -499,9 +499,9 @@ public sealed class DeviceController
         AppSettings.Save();
     }
 
-    public void SendRaw(byte[] b) { if (Sess != null && Sess.Alive) Sess.Send(new[] { b }, "手动发送"); }
+    public void SendRaw(byte[] b) { if (Sess != null && Sess.Alive) Sess.Send(new[] { b }, "Manual send"); }
 
-    /// 托盘/快捷键：按型号支持的模式循环切换
+    /// Cycle through the modes supported by the model from the tray or hotkey.
     public string? CycleNoise()
     {
         if (!IsConnected || Model == null || Model.Noise.Count == 0) return null;
@@ -513,7 +513,7 @@ public sealed class DeviceController
         return Catalog.NOISE_LABEL.GetValueOrDefault(next, next);
     }
 
-    // ------------------------------------------------------------ 多设备连接
+    // ------------------------------------------------------------ Multipoint
     public DualCfg Dual => Model?.Dual ?? new DualCfg();
     public List<PhoneInfo> ConnectedPhones() => Phones.Values.Where(p => p.Connected).ToList();
     public static bool IsThisPc(PhoneInfo p)
@@ -526,7 +526,7 @@ public sealed class DeviceController
     {
         if (!IsConnected || Model == null || !Has("dual")) return;
         Phones.Clear(); Plays.Clear(); PhonesChanged?.Invoke();
-        Sess!.Send(Sess.Proto.DevList(), "读取多设备连接列表");
+        Sess!.Send(Sess.Proto.DevList(), "Read multipoint device list");
     }
     void DualLater(params int[] delays) { foreach (var d in delays) _dualJobs.Add(Later(d, RefreshDevList)); }
 
@@ -537,14 +537,14 @@ public sealed class DeviceController
         if (Proto == null) return;
         var cfg = Dual;
         if (turnOffLdac)
-            Do(Proto.SetQuality(false, Get<bool>("aptx"), Get<bool>("adaptive"), Get<bool>("lossless")), "关闭 LDAC（多设备连接需要）", new() { ["ldac"] = false });
-        Do(Proto.SetDual(on), $"多设备连接 → {(on ? "开" : "关")}", new() { ["dual"] = on });
+            Do(Proto.SetQuality(false, Get<bool>("aptx"), Get<bool>("adaptive"), Get<bool>("lossless")), "Turn off LDAC (required for multipoint)", new() { ["ldac"] = false });
+        Do(Proto.SetDual(on), $"Multipoint -> {(on ? "On" : "Off")}", new() { ["dual"] = on });
         if ((on && cfg.OpenReset) || cfg.ToggleReset)
         {
-            Log("--", null, "该型号切换多设备连接后会自动重启，约 20 秒后自动重连");
-            SetStatus(ConnState.Connected, "耳机正在重启以应用多设备设置，约 20 秒后自动重连…");
-            Note("耳机即将重启", "该型号切换多设备连接后会自动重启，约 20 秒后自动重连。", NoticeKind.Info);
-            Later(1500, () => { if (Sess != null) Disconnect(keepReconnect: true); SetStatus(ConnState.Connecting, "等待耳机重启…"); });
+            Log("--", null, "This model restarts after the multipoint setting changes and reconnects in about 20 seconds");
+            SetStatus(ConnState.Connected, "Headset restarting to apply multipoint settings; reconnecting in about 20 seconds…");
+            Note("Headset will restart", "This model restarts after the multipoint setting changes and reconnects in about 20 seconds.", NoticeKind.Info);
+            Later(1500, () => { if (Sess != null) Disconnect(keepReconnect: true); SetStatus(ConnState.Connecting, "Waiting for headset to restart…"); });
             _autoRetries = 4;
             ScheduleReconnect(20000);
         }
@@ -562,7 +562,7 @@ public sealed class DeviceController
             void Again(int i)
             {
                 var cur = string.Join(",", ConnectedPhones().Select(p => p.Mac).OrderBy(x => x));
-                if (IsConnected && cur == snap) Sess!.Send(frames, $"{note}（重发 {i}/2）");
+                if (IsConnected && cur == snap) Sess!.Send(frames, $"{note} (retry {i}/2)");
             }
             _dualJobs.Add(Later(3000, () => Again(1)));
             _dualJobs.Add(Later(6000, () => Again(2)));
@@ -573,22 +573,22 @@ public sealed class DeviceController
     public void DevConnect(PhoneInfo p)
     {
         if (!IsConnected) return;
-        if (ConnectedPhones().Count >= 2) { Note("已满", "耳机已连接两台设备，请先断开其中一台", NoticeKind.Warning); return; }
-        SendDevCmd(Proto!.DevConnect(p.Num), $"连接设备 {p.Name}");
+        if (ConnectedPhones().Count >= 2) { Note("Device limit reached", "The headset is already connected to two devices. Disconnect one first.", NoticeKind.Warning); return; }
+        SendDevCmd(Proto!.DevConnect(p.Num), $"Connect device {p.Name}");
     }
     public void DevDisconnect(PhoneInfo p)
     {
         if (!IsConnected) return;
-        SendDevCmd(Proto!.DevDisconnect(p.Num), $"断开设备 {p.Name}");
+        SendDevCmd(Proto!.DevDisconnect(p.Num), $"Disconnect device {p.Name}");
     }
     public void DevPlay(PhoneInfo p, int state)
     {
         if (!IsConnected) return;
         var fr = Proto!.SetPlay(p.Mac, state);
-        if (fr.Count > 0) { Sess!.Send(fr, $"{(state == 1 ? "设为播放" : "挂起")} {p.Name}"); DualLater(1500); }
+        if (fr.Count > 0) { Sess!.Send(fr, $"{(state == 1 ? "Set active" : "Pause")} {p.Name}"); DualLater(1500); }
     }
 
-    // 配对新设备
+    // Pair a new device.
     public bool Pairing { get; private set; }
     public int PairingLeft { get; private set; }
     public bool? PairingResult { get; private set; }
@@ -597,8 +597,8 @@ public sealed class DeviceController
     public void StartPairing()
     {
         if (!IsConnected || Pairing) return;
-        if (ConnectedPhones().Count >= 2) { Note("已满", "耳机已连接两台设备，请先断开其中一台", NoticeKind.Warning); return; }
-        Sess!.Send(Proto!.NewConnect(), "进入配对模式（连接新设备）");
+        if (ConnectedPhones().Count >= 2) { Note("Device limit reached", "The headset is already connected to two devices. Disconnect one first.", NoticeKind.Warning); return; }
+        Sess!.Send(Proto!.NewConnect(), "Enter pairing mode (connect a new device)");
         Pairing = true; PairingResult = null; _pairBase = ConnectedPhones().Count; _pairStart = DateTime.Now; PairingLeft = 120;
         _pairTick?.Stop();
         _pairTick = new DispatcherTimer(DispatcherPriority.Normal, _d) { Interval = TimeSpan.FromSeconds(1) };
@@ -623,10 +623,10 @@ public sealed class DeviceController
         if (IsConnected && sendStop)
         {
             var fr = Proto!.StopNewConnect();
-            if (fr.Count > 0 && !ok) Sess!.Send(fr, "退出配对模式");
+            if (fr.Count > 0 && !ok) Sess!.Send(fr, "Exit pairing mode");
             RefreshDevList();
         }
-        if (ok) Note("新设备已连接", "耳机已连接到新设备。", NoticeKind.Success);
+        if (ok) Note("New device connected", "The headset is connected to the new device.", NoticeKind.Success);
         PairingChanged?.Invoke();
     }
 }

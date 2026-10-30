@@ -15,7 +15,7 @@ public interface ILink : IDisposable
 {
     string Desc { get; }
     void Write(byte[] b);
-    /// 读取一批数据；超时返回空数组；连接断开时抛异常
+    /// Read a batch of data; return an empty array on timeout and throw if the connection is closed.
     byte[] Read();
 }
 
@@ -24,7 +24,7 @@ public static class Bt
     public static readonly Guid SPP = new("00001101-0000-1000-8000-00805F9B34FB");
 }
 
-// ------------------------------------------------------------ 蓝牙串口 COM
+// ------------------------------------------------------------ Bluetooth serial COM
 public sealed class SerialLink : ILink
 {
     readonly SerialPort _p;
@@ -82,17 +82,17 @@ public sealed class BthSocketLink : ILink
         bool ok;
         try { ok = t.Wait(timeoutMs); }
         catch (AggregateException ae) { _s.Dispose(); throw ae.InnerException ?? ae; }
-        if (!ok) { _s.Dispose(); throw new TimeoutException("连接超时"); }
-        Desc = channel <= 0 ? $"{Util.FmtMac(addr)} (SPP)" : $"{Util.FmtMac(addr)} 通道 {channel}";
+        if (!ok) { _s.Dispose(); throw new TimeoutException("Connection timed out"); }
+        Desc = channel <= 0 ? $"{Util.FmtMac(addr)} (SPP)" : $"{Util.FmtMac(addr)} channel {channel}";
     }
     public void Write(byte[] b) => _s.Send(b);
     public byte[] Read()
     {
-        // 先 select 等待（150ms），有数据再读，不依赖 SO_RCVTIMEO
+        // Wait with select (150 ms) before reading; do not rely on SO_RCVTIMEO.
         if (!_s.Poll(150_000, SelectMode.SelectRead)) return Array.Empty<byte>();
         var buf = new byte[1024];
         int n = _s.Receive(buf);
-        if (n == 0) throw new IOException("对端关闭连接");
+        if (n == 0) throw new IOException("The remote endpoint closed the connection");
         return buf[..n];
     }
     public void Dispose() { try { _s.Shutdown(SocketShutdown.Both); } catch { } try { _s.Dispose(); } catch { } }
@@ -123,7 +123,7 @@ public sealed class WinRtLink : ILink
             while (!_closed)
             {
                 int n = _in.Read(buf, 0, buf.Length);
-                if (n <= 0) throw new IOException("对端关闭连接");
+                if (n <= 0) throw new IOException("The remote endpoint closed the connection");
                 _q.Add(buf[..n]);
             }
         }
@@ -134,7 +134,7 @@ public sealed class WinRtLink : ILink
         var s = new StreamSocket();
         var t = s.ConnectAsync(svc.ConnectionHostName, svc.ConnectionServiceName, SocketProtectionLevel.BluetoothEncryptionAllowNullAuthentication).AsTask();
         _ = t.ContinueWith(x => { _ = x.Exception; }, TaskContinuationOptions.OnlyOnFaulted);
-        if (await Task.WhenAny(t, Task.Delay(timeoutMs)) != t) { s.Dispose(); throw new TimeoutException("连接超时"); }
+        if (await Task.WhenAny(t, Task.Delay(timeoutMs)) != t) { s.Dispose(); throw new TimeoutException("Connection timed out"); }
         await t;
         return new WinRtLink(s, desc);
     }
@@ -148,7 +148,7 @@ public sealed class WinRtLink : ILink
     public void Dispose() { _closed = true; try { _sock.Dispose(); } catch { } }
 }
 
-// ------------------------------------------------------------ 设备发现
+// ------------------------------------------------------------ Device discovery
 public sealed class DeviceEntry
 {
     public string Name = "";
@@ -162,9 +162,9 @@ public sealed class DeviceEntry
     {
         get
         {
-            var n = string.IsNullOrEmpty(Name) ? "(未知名称)" : Name;
+            var n = string.IsNullOrEmpty(Name) ? "(Unknown name)" : Name;
             if (Com != null) return $"{n}  ·  {Com}";
-            return n + (Connected ? "  ·  已连接" : "");
+            return n + (Connected ? "  ·  Connected" : "");
         }
     }
     public override string ToString() => Display;
@@ -174,7 +174,7 @@ public static class Discovery
 {
     static string FmtMac(string h) { h = h.ToUpperInvariant(); return string.Join(":", Enumerable.Range(0, 6).Select(i => h.Substring(i * 2, 2))); }
 
-    /// 读取注册表中已配对的经典蓝牙设备：MAC -> 名称
+    /// Read paired classic Bluetooth devices from the registry: MAC -> name.
     public static Dictionary<string, string> PairedFromRegistry()
     {
         var o = new Dictionary<string, string>();
@@ -196,7 +196,7 @@ public static class Discovery
         return o;
     }
 
-    /// 通过 WinRT 枚举已配对的经典蓝牙设备（含连接状态）
+    /// Enumerate paired classic Bluetooth devices and their connection state through WinRT.
     public static async Task<List<DeviceEntry>> PairedFromWinRtAsync()
     {
         var res = new List<DeviceEntry>();
@@ -224,7 +224,7 @@ public static class Discovery
         return res;
     }
 
-    /// 蓝牙串口（传出）COM 口：(COMx, MAC)
+    /// Outgoing Bluetooth serial COM ports: (COMx, MAC).
     public static List<(string Port, string? Mac)> BtComPorts()
     {
         var res = new List<(string, string?)>();
@@ -246,7 +246,7 @@ public static class Discovery
                         var port = dp?.GetValue("PortName") as string;
                         if (string.IsNullOrEmpty(port) || !present.Contains(port)) continue;
                         var m = Regex.Match(inst.ToUpperInvariant(), "&([0-9A-F]{12})_");
-                        if (!m.Success || m.Groups[1].Value == "000000000000") continue;   // 传入口无法用来连接耳机
+                        if (!m.Success || m.Groups[1].Value == "000000000000") continue;   // Incoming ports cannot connect to the headset.
                         res.Add((port, FmtMac(m.Groups[1].Value)));
                     }
                     catch { }
@@ -283,25 +283,25 @@ public static class Discovery
         catch { return null; }
     }
 
-    /// 取设备的 RFCOMM 服务（SPP 优先，其余在后）
+    /// Get the device's RFCOMM services, with SPP first.
     public static async Task<List<RfcommDeviceService>> RfcommServicesAsync(string mac, Action<string> log)
     {
         var o = new List<RfcommDeviceService>();
         try
         {
             var dev = await BluetoothDevice.FromBluetoothAddressAsync(Util.ParseMac(mac));
-            if (dev == null) { log("WinRT：找不到该蓝牙设备"); return o; }
+            if (dev == null) { log("WinRT: Bluetooth device not found"); return o; }
             try { await dev.RequestAccessAsync(); } catch { }
             var spp = await dev.GetRfcommServicesForIdAsync(RfcommServiceId.SerialPort, BluetoothCacheMode.Uncached);
             if (spp.Error == BluetoothError.Success) o.AddRange(spp.Services);
-            else log($"WinRT：查询 SPP 服务失败 {spp.Error}");
+            else log($"WinRT: Failed to query SPP service: {spp.Error}");
             var all = await dev.GetRfcommServicesAsync(BluetoothCacheMode.Cached);
             if (all.Error == BluetoothError.Success)
                 foreach (var s in all.Services)
                     if (!o.Any(x => x.ServiceId.Uuid == s.ServiceId.Uuid && x.ConnectionServiceName == s.ConnectionServiceName)) o.Add(s);
-            log($"WinRT：发现 {o.Count} 个 RFCOMM 服务：" + string.Join(", ", o.Select(s => $"{s.ServiceId.Uuid}@{s.ConnectionServiceName}")));
+            log($"WinRT: Found {o.Count} RFCOMM service(s): " + string.Join(", ", o.Select(s => $"{s.ServiceId.Uuid}@{s.ConnectionServiceName}")));
         }
-        catch (Exception e) { log("WinRT：" + e.Message); }
+        catch (Exception e) { log("WinRT: " + e.Message); }
         return o;
     }
 }

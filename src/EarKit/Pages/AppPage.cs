@@ -18,11 +18,11 @@ public sealed class AppPage : PageBase
     public AppPage()
     {
         Sync = true;
-        Root.Children.Add(Ui.Header("应用设置", "EarKit 自身的外观、启动、托盘、通知与连接选项。"));
+        Root.Children.Add(Ui.Header("Application Settings", "EarKit's own appearance, startup, tray, notifications and connection options."));
 
-        // 外观
-        Root.Children.Add(Ui.Section("外观"));
-        _theme = Ui.Combo(new[] { "跟随系统", "浅色", "深色" }, 160);
+        // Appearance
+        Root.Children.Add(Ui.Section("Appearance"));
+        _theme = Ui.Combo(new[] { "Follow the system", "Light", "Dark" }, 160);
         _theme.SelectedIndex = S.Theme switch { "light" => 1, "dark" => 2, _ => 0 };
         _theme.SelectionChanged += (_, _) =>
         {
@@ -30,18 +30,25 @@ public sealed class AppPage : PageBase
             S.Theme = _theme.SelectedIndex switch { 1 => "light", 2 => "dark", _ => "system" };
             AppSettings.Save(); App.ApplyTheme(S.Theme);
         };
-        Root.Children.Add(Ui.Row(W.SymbolRegular.WeatherMoon24, "主题", "选择浅色、深色或跟随 Windows", _theme));
-
+        Root.Children.Add(Ui.Row(W.SymbolRegular.WeatherMoon24, "Theme", "Choose Light, Dark or Follow Windows", _theme));
         var fx = new[] { "mica", "acrylic", "tabbed", "none" };
-        var fxCombo = Ui.Combo(new[] { "云母（Mica）", "亚克力（Acrylic）", "云母 · 加深（Tabbed）", "关闭（纯色背景）" }, 200);
+        var fxCombo = Ui.Combo(new[] { "Mica", "Acrylic", "Mica·Tabbed", "Off(Solid color background)" }, 200);
         fxCombo.SelectedIndex = Math.Max(0, Array.IndexOf(fx, S.Backdrop));
-        var opSlider = new Slider { Minimum = 0, Maximum = 100, Width = 200, TickFrequency = 5, IsSnapToTickEnabled = true,
-            Value = S.BackdropOpacity, VerticalAlignment = VerticalAlignment.Center };
+        var opSlider = new Slider
+        {
+            Minimum = 0,
+            Maximum = 100,
+            Width = 200,
+            TickFrequency = 5,
+            IsSnapToTickEnabled = true,
+            Value = S.BackdropOpacity,
+            VerticalAlignment = VerticalAlignment.Center
+        };
         var opText = Ui.Fg(Ui.Plain($"{S.BackdropOpacity}%", 13), "TextFillColorSecondaryBrush");
         opText.Width = 44; opText.TextAlignment = TextAlignment.Right; opText.VerticalAlignment = VerticalAlignment.Center;
         var opPanel = new StackPanel { Orientation = Orientation.Horizontal };
         opPanel.Children.Add(opSlider); opPanel.Children.Add(opText);
-        var rOp = Ui.Row(W.SymbolRegular.Blur24, "背景不透明度", "数值越大背景越实、文字越清晰；数值越小透明效果越明显", opPanel);
+        var rOp = Ui.Row(W.SymbolRegular.Blur24, "Background opacity", "The larger the value, the more solid the background and the clearer the text; the smaller the value, the more obvious the transparency effect", opPanel);
         bool supported = Backdrop.Supported;
         fxCombo.IsEnabled = supported;
         Ui.Show(rOp, supported && S.Backdrop != "none");
@@ -59,30 +66,30 @@ public sealed class AppPage : PageBase
             opText.Text = $"{S.BackdropOpacity}%";
             AppSettings.Save(); App.ApplyBackdrop();
         };
-        Root.Children.Add(Ui.Row(W.SymbolRegular.Color24, "背景效果",
-            supported ? "窗口背景的透明材质" : "需要 Windows 11 22H2 或更高版本，当前使用纯色背景", fxCombo));
+        Root.Children.Add(Ui.Row(W.SymbolRegular.Color24, "Background Effect",
+            supported ? "Transparent material for window background" : "Requires Windows 11 22H2 or later, currently using solid color background", fxCombo));
         Root.Children.Add(rOp);
 
-        // 启动与窗口
-        Root.Children.Add(Ui.Section("启动与窗口"));
+        //Start and window
+        Root.Children.Add(Ui.Section("Startup and Window"));
         _auto = Ui.Toggle(v => { if (Sync) return; AutoStart.Set(v, S.StartMinimized); Ui.Show(_rMin!, v); });
         _auto.IsChecked = AutoStart.IsEnabled();
-        Root.Children.Add(Ui.Row(W.SymbolRegular.Power24, "开机自动启动", "登录 Windows 后自动运行 EarKit", _auto));
+        Root.Children.Add(Ui.Row(W.SymbolRegular.Power24, "Start automatically at boot", "Automatically run EarKit after logging in to Windows", _auto));
         _min = Ui.Toggle(v => { if (Sync) return; S.StartMinimized = v; AppSettings.Save(); if (AutoStart.IsEnabled()) AutoStart.Set(true, v); });
         _min.IsChecked = S.StartMinimized;
-        _rMin = Ui.Row(W.SymbolRegular.ArrowExit24, "自启动时最小化到托盘", "开机启动时不弹出窗口，只在托盘显示图标", _min);
+        _rMin = Ui.Row(W.SymbolRegular.ArrowExit24, "Minimize to the tray when starting up", "No pop-up window when starting up, only display the icon in the tray", _min);
         Ui.Show(_rMin, AutoStart.IsEnabled());
         Root.Children.Add(_rMin);
         _tray = Ui.Toggle(v => { if (Sync) return; S.CloseToTray = v; AppSettings.Save(); });
         _tray.IsChecked = S.CloseToTray;
-        Root.Children.Add(Ui.Row(W.SymbolRegular.Apps24, "关闭窗口时最小化到托盘", "关闭后程序继续在后台运行，可从托盘图标打开或退出", _tray));
+        Root.Children.Add(Ui.Row(W.SymbolRegular.Apps24, "Minimize to the tray when closing the window", "The program continues to run in the background after closing and can be opened or exited from the tray icon", _tray));
 
-        // 连接
-        Root.Children.Add(Ui.Section("连接"));
+        // connect
+        Root.Children.Add(Ui.Section("Connection"));
         _autoConn = Ui.Toggle(v => { if (Sync) return; S.AutoConnect = v; AppSettings.Save(); });
         _autoConn.IsChecked = S.AutoConnect;
-        Root.Children.Add(Ui.Row(W.SymbolRegular.BluetoothConnected24, "自动连接上次的耳机", "启动时以及耳机重新连上电脑后自动连接", _autoConn));
-        _model = Ui.Combo(new[] { "自动识别（推荐）" }.Concat(Catalog.MODELS.Select(m => $"{m.Name}  [{m.Key}]")), 280);
+        Root.Children.Add(Ui.Row(W.SymbolRegular.BluetoothConnected24, "Automatically connect to the last headset", "Automatically connect when starting up and when the headset is reconnected to the computer", _autoConn));
+        _model = Ui.Combo(new[] { "Automatic recognition (recommended)" }.Concat(Catalog.MODELS.Select(m => $"{m.Name} [{m.Key}]")), 280);
         var mi = Catalog.MODELS.FindIndex(m => m.Key == S.ManualModel);
         _model.SelectedIndex = mi + 1;
         _model.SelectionChanged += (_, _) =>
@@ -91,12 +98,12 @@ public sealed class AppPage : PageBase
             var i = _model.SelectedIndex;
             C.SetManualModel(i > 0 ? Catalog.MODELS[i - 1] : null);
         };
-        Root.Children.Add(Ui.Row(W.SymbolRegular.Headphones24, "耳机型号", "通常无需修改。若自动识别错误，可在此手动指定", _model));
+        Root.Children.Add(Ui.Row(W.SymbolRegular.Headphones24, "Headphone model", "Usually no modification is required. If the automatic recognition error occurs, you can manually specify it here", _model));
 
-        _connMode = Ui.Combo(new[] { "蓝牙直连（推荐）", "蓝牙串口 COM 口" }, 200);
+        _connMode = Ui.Combo(new[] { "Bluetooth direct connection (recommended)", "Bluetooth serial port COM port" }, 200);
         _connMode.SelectedIndex = S.UseCom ? 1 : 0;
         _com = new ComboBox { MinWidth = 120, Margin = new Thickness(8, 0, 0, 0) };
-        _chan = new TextBox { Width = 64, Text = S.RfcommChannel.ToString(), Margin = new Thickness(8, 0, 0, 0), ToolTip = "RFCOMM 通道，0 = 自动" };
+        _chan = new TextBox { Width = 64, Text = S.RfcommChannel.ToString(), Margin = new Thickness(8, 0, 0, 0), ToolTip = "RFCOMM channel, 0 = automatic" };
         var adv = new StackPanel { Orientation = Orientation.Horizontal };
         adv.Children.Add(_connMode);
         adv.Children.Add(_chan);
@@ -113,15 +120,15 @@ public sealed class AppPage : PageBase
             if (int.TryParse(_chan.Text.Trim(), out var c) && c >= 0 && c <= 30) { S.RfcommChannel = c; AppSettings.Save(); }
             else _chan.Text = S.RfcommChannel.ToString();
         };
-        _rCom = Ui.Row(W.SymbolRegular.PlugConnected24, "连接方式（高级）",
-            "默认通过蓝牙 RFCOMM 直接连接。若连接失败，可在 Windows“更多蓝牙设置 → COM 端口”中为耳机添加“传出”端口后改用 COM 口；右侧数字为 RFCOMM 通道（0 = 自动）。", adv);
+        _rCom = Ui.Row(W.SymbolRegular.PlugConnected24, "Connection method (advanced)",
+            "By default, connect directly over Bluetooth RFCOMM. If that fails, add an outgoing port for the headset under Windows Settings > Bluetooth & devices > More Bluetooth settings > COM Ports, then switch to COM. The number on the right is the RFCOMM channel (0 = automatic).", adv);
         Root.Children.Add(_rCom);
 
-        // 通知
-        Root.Children.Add(Ui.Section("通知"));
+        // Notifications
+        Root.Children.Add(Ui.Section("Notifications"));
         _notify = Ui.Toggle(v => { if (Sync) return; S.NotifyConnect = v; AppSettings.Save(); });
         _notify.IsChecked = S.NotifyConnect;
-        Root.Children.Add(Ui.Row(W.SymbolRegular.Alert24, "连接状态通知", "耳机连接或断开时在托盘弹出通知", _notify));
+        Root.Children.Add(Ui.Row(W.SymbolRegular.Alert24, "Connection notifications", "Show a tray notification when the headset connects or disconnects", _notify));
         _lowBat = Ui.Toggle(v => { if (Sync) return; S.LowBatteryAlert = v; AppSettings.Save(); });
         _lowBat.IsChecked = S.LowBatteryAlert;
         _bat = Ui.Combo(new[] { "10%", "15%", "20%", "30%" }, 90);
@@ -131,33 +138,33 @@ public sealed class AppPage : PageBase
         var bp = new StackPanel { Orientation = Orientation.Horizontal };
         bp.Children.Add(_bat); _bat.Margin = new Thickness(0, 0, 12, 0);
         bp.Children.Add(_lowBat);
-        Root.Children.Add(Ui.Row(W.SymbolRegular.BatteryWarning24, "低电量提醒", "左耳或右耳电量低于阈值时提醒（充电中不提醒）", bp));
+        Root.Children.Add(Ui.Row(W.SymbolRegular.BatteryWarning24, "Low battery alert", "Alert when either earbud falls below the threshold (not while charging)", bp));
 
-        // 快捷键
-        Root.Children.Add(Ui.Section("快捷键"));
-        _hkBox = new TextBox { Width = 180, IsReadOnly = true, Text = HotKeyService.Describe(S.HotkeyMods, S.HotkeyVk), ToolTip = "点击后按下新的组合键" };
+        // Hotkey
+        Root.Children.Add(Ui.Section("Hotkey"));
+        _hkBox = new TextBox { Width = 180, IsReadOnly = true, Text = HotKeyService.Describe(S.HotkeyMods, S.HotkeyVk), ToolTip = "Click here, then press a new key combination" };
         _hkBox.PreviewKeyDown += HkKeyDown;
         _hk = Ui.Toggle(v => { if (Sync) return; S.HotkeyEnabled = v; AppSettings.Save(); App.ApplyHotKey(); });
         _hk.IsChecked = S.HotkeyEnabled;
         var hp = new StackPanel { Orientation = Orientation.Horizontal };
         hp.Children.Add(_hkBox); _hkBox.Margin = new Thickness(0, 0, 12, 0);
         hp.Children.Add(_hk);
-        Root.Children.Add(Ui.Row(W.SymbolRegular.Keyboard24, "全局快捷键：切换降噪模式", "在任何程序中按下即可循环切换降噪 / 通透 / 关闭。点击输入框后按下新的组合键（需包含 Ctrl / Alt / Shift / Win）", hp));
+        Root.Children.Add(Ui.Row(W.SymbolRegular.Keyboard24, "Global hotkey: cycle noise control", "Press this shortcut in any app to cycle through Noise Cancellation / Ambient / Off. Click the box and press a new combination (must include Ctrl / Alt / Shift / Win).", hp));
 
-        // 实验
-        Root.Children.Add(Ui.Section("实验功能"));
+        // Experimental
+        Root.Children.Add(Ui.Section("Experimental"));
         _unlock = Ui.Toggle(v => { if (Sync) return; C.SetUnlock(v); });
         _unlock.IsChecked = S.UnlockAll;
-        Root.Children.Add(Ui.Row(W.SymbolRegular.Shield24, "解锁全部功能", "显示当前型号未声明支持的功能。可能无效或产生意外行为，请谨慎使用", _unlock));
+        Root.Children.Add(Ui.Row(W.SymbolRegular.Shield24, "Unlock all features", "Show features not declared as supported by this model. They may not work or may behave unexpectedly; use with caution.", _unlock));
 
-        // 关于
-        Root.Children.Add(Ui.Section("关于"));
+        // About
+        Root.Children.Add(Ui.Section("About"));
         var ver = typeof(App).Assembly.GetName().Version;
-        var open = Ui.Btn("打开数据文件夹", W.SymbolRegular.DocumentText24, () =>
+        var open = Ui.Btn("Open data folder", W.SymbolRegular.DocumentText24, () =>
         {
             try { Directory.CreateDirectory(AppSettings.Dir); Process.Start(new ProcessStartInfo("explorer.exe", $"\"{AppSettings.Dir}\"") { UseShellExecute = true }); } catch { }
         });
-        var lic = Ui.Btn("开源许可", W.SymbolRegular.Document24, () =>
+        var lic = Ui.Btn("Open-source licenses", W.SymbolRegular.Document24, () =>
         {
             var f = Path.Combine(AppContext.BaseDirectory, "THIRD-PARTY-NOTICES.txt");
             var l = Path.Combine(AppContext.BaseDirectory, "LICENSE.txt");
@@ -166,7 +173,7 @@ public sealed class AppPage : PageBase
         var btns = new StackPanel { Orientation = Orientation.Horizontal };
         btns.Children.Add(lic); lic.Margin = new Thickness(0, 0, 8, 0); btns.Children.Add(open);
         Root.Children.Add(Ui.Row(W.SymbolRegular.Info24, $"EarKit {ver?.ToString(3)}",
-            "开源的第三方耳机控制工具，兼容 23 款 EarFun 耳机（高通 GAIA / EF 协议）。EarFun 是其所有者的商标，本软件与 EarFun 公司无关，也未获其认可。本软件按“原样”提供，不附带任何担保。设置与崩溃日志保存在 %AppData%\\EarKit。", btns));
+            "An open-source third-party headset control app compatible with 23 EarFun models (Qualcomm GAIA / EF protocols). EarFun is a trademark of its owner. This software is not affiliated with or endorsed by EarFun. It is provided “as is” without warranty. Settings and crash logs are stored in %AppData%\\EarKit.", btns));
         Sync = false;
     }
 
@@ -181,11 +188,11 @@ public sealed class AppPage : PageBase
         if (m.HasFlag(ModifierKeys.Alt)) mods |= HotKeyService.MOD_ALT;
         if (m.HasFlag(ModifierKeys.Shift)) mods |= HotKeyService.MOD_SHIFT;
         if (m.HasFlag(ModifierKeys.Windows)) mods |= HotKeyService.MOD_WIN;
-        if (mods == 0) { _hkBox.Text = "需包含 Ctrl / Alt / Shift"; return; }
+        if (mods == 0) { _hkBox.Text = "Must include Ctrl / Alt / Shift"; return; }
         int vk = KeyInterop.VirtualKeyFromKey(key);
         S.HotkeyMods = mods; S.HotkeyVk = vk; AppSettings.Save();
         _hkBox.Text = HotKeyService.Describe(mods, vk);
-        if (S.HotkeyEnabled && !App.ApplyHotKey()) _hkBox.Text += "（被占用）";
+        if (S.HotkeyEnabled && !App.ApplyHotKey()) _hkBox.Text += " (in use)";
     }
 
     protected override void OnState(StateUpdate s) { }

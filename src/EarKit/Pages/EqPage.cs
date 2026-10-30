@@ -22,30 +22,30 @@ public sealed class EqPage : PageBase
     bool _dragging;
 
     static readonly string[] L10 = { "31", "63", "125", "250", "500", "1K", "2K", "4K", "8K", "16K" };
-    static readonly string[] L6 = { "低音", "中低", "中音", "中高", "高音", "超高" };
+    static readonly string[] L6 = { "Sub-bass", "Bass", "Midrange", "Upper midrange", "Treble", "Ultra-treble" };
 
     public EqPage()
     {
         _curve.SetResourceReference(EqCurve.AccentProperty, "SystemAccentColorPrimaryBrush");
         _curve.SetResourceReference(EqCurve.TextBrushProperty, "TextFillColorTertiaryBrush");
-        Root.Children.Add(Ui.Header("均衡器", "选择官方预设或手动调节各频段。耳机不会回读 EQ，这里显示的是本程序上次为该型号设置的值。"));
+        Root.Children.Add(Ui.Header("Equalizer", "Choose a preset or adjust the frequency bands manually. The headset does not report EQ settings, so this shows the last values set by EarKit for this model."));
 
         var bar = new Grid();
         for (int i = 0; i < 6; i++) bar.ColumnDefinitions.Add(new ColumnDefinition { Width = i == 4 ? new GridLength(1, GridUnitType.Star) : GridLength.Auto });
-        var lbl = Ui.T("预设", "RowTitle"); lbl.VerticalAlignment = VerticalAlignment.Center; lbl.Margin = new Thickness(0, 0, 12, 0);
+        var lbl = Ui.T("Preset", "RowTitle"); lbl.VerticalAlignment = VerticalAlignment.Center; lbl.Margin = new Thickness(0, 0, 12, 0);
         bar.Children.Add(lbl);
         Grid.SetColumn(_preset, 1); bar.Children.Add(_preset);
-        var save = Ui.Btn("保存为预设", W.SymbolRegular.Save24, SavePreset); save.Margin = new Thickness(8, 0, 0, 0);
+        var save = Ui.Btn("Save preset", W.SymbolRegular.Save24, SavePreset); save.Margin = new Thickness(8, 0, 0, 0);
         Grid.SetColumn(save, 2); bar.Children.Add(save);
-        _del = Ui.Btn("删除", W.SymbolRegular.Delete24, DeletePreset); _del.Margin = new Thickness(8, 0, 0, 0);
+        _del = Ui.Btn("Delete", W.SymbolRegular.Delete24, DeletePreset); _del.Margin = new Thickness(8, 0, 0, 0);
         Grid.SetColumn(_del, 3); bar.Children.Add(_del);
         var right = new StackPanel { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Right };
-        var al = Ui.T("拖动后自动应用", "RowDesc"); al.VerticalAlignment = VerticalAlignment.Center; al.Margin = new Thickness(0, 0, 8, 0);
+        var al = Ui.T("Apply automatically while adjusting", "RowDesc"); al.VerticalAlignment = VerticalAlignment.Center; al.Margin = new Thickness(0, 0, 8, 0);
         _auto = new W.ToggleSwitch { IsChecked = S.EqAutoApply };
         _auto.Checked += (_, _) => { S.EqAutoApply = true; AppSettings.Save(); };
         _auto.Unchecked += (_, _) => { S.EqAutoApply = false; AppSettings.Save(); };
         right.Children.Add(al); right.Children.Add(_auto);
-        var apply = Ui.Btn("应用到耳机", W.SymbolRegular.Play24, Send, W.ControlAppearance.Primary); apply.Margin = new Thickness(12, 0, 0, 0);
+        var apply = Ui.Btn("Apply to headset", W.SymbolRegular.Play24, Send, W.ControlAppearance.Primary); apply.Margin = new Thickness(12, 0, 0, 0);
         right.Children.Add(apply);
         Grid.SetColumn(right, 4); Grid.SetColumnSpan(right, 2); bar.Children.Add(right);
         Root.Children.Add(Ui.Panel(bar, "Panel", new Thickness(0, 0, 0, 8)));
@@ -89,7 +89,7 @@ public sealed class EqPage : PageBase
     void FillPresets(string? select = null)
     {
         _preset.Items.Clear();
-        _preset.Items.Add("自定义");
+        _preset.Items.Add("Custom");
         foreach (var p in _n == 10 ? Catalog.EQ_PRESETS_10 : Catalog.EQ_PRESETS_6) _preset.Items.Add(p.Name);
         foreach (var p in S.CustomPresets.Where(p => p.Bands == _n)) _preset.Items.Add("★ " + p.Name);
         var cur = Levels();
@@ -99,14 +99,14 @@ public sealed class EqPage : PageBase
             foreach (var p in S.CustomPresets.Where(p => p.Bands == _n)) if (p.Values.SequenceEqual(cur)) { match = "★ " + p.Name; break; }
             foreach (var p in _n == 10 ? Catalog.EQ_PRESETS_10 : Catalog.EQ_PRESETS_6) if (match == null && p.V.SequenceEqual(cur)) match = p.Name;
         }
-        _preset.SelectedItem = match ?? "自定义";
+        _preset.SelectedItem = match ?? "Custom";
         _del.IsEnabled = (_preset.SelectedItem as string)?.StartsWith("★ ") == true;
     }
 
     void MarkCustom()
     {
         if (Sync) return;
-        Guard(() => { _preset.SelectedItem = "自定义"; _del.IsEnabled = false; });
+        Guard(() => { _preset.SelectedItem = "Custom"; _del.IsEnabled = false; });
     }
 
     int[] Levels() => _sl.Select(s => (int)Math.Round(s.Value)).ToArray();
@@ -122,7 +122,7 @@ public sealed class EqPage : PageBase
 
     void PickPreset()
     {
-        if (_preset.SelectedItem is not string name || name == "自定义") { _del.IsEnabled = false; return; }
+        if (_preset.SelectedItem is not string name || name == "Custom") { _del.IsEnabled = false; return; }
         int[]? vals = null;
         if (name.StartsWith("★ ")) vals = S.CustomPresets.FirstOrDefault(p => p.Bands == _n && p.Name == name[2..])?.Values;
         else vals = (_n == 10 ? Catalog.EQ_PRESETS_10 : Catalog.EQ_PRESETS_6).FirstOrDefault(p => p.Name == name).V;
@@ -141,11 +141,11 @@ public sealed class EqPage : PageBase
 
     async void SavePreset()
     {
-        var tb = new TextBox { Text = "我的预设", MinWidth = 300 };
+        var tb = new TextBox { Text = "My preset", MinWidth = 300 };
         var sp = new StackPanel();
-        sp.Children.Add(new TextBlock { Text = "为当前 EQ 设置命名：", Margin = new Thickness(0, 0, 0, 8) });
+        sp.Children.Add(new TextBlock { Text = "Name this EQ setting:", Margin = new Thickness(0, 0, 0, 8) });
         sp.Children.Add(tb);
-        var mb = new W.MessageBox { Title = "保存为自定义预设", Content = sp, PrimaryButtonText = "保存", CloseButtonText = "取消" };
+        var mb = new W.MessageBox { Title = "Save custom preset", Content = sp, PrimaryButtonText = "Save", CloseButtonText = "Cancel" };
         if (Application.Current.MainWindow is { IsVisible: true } o) mb.Owner = o;
         tb.Loaded += (_, _) => { tb.Focus(); tb.SelectAll(); };
         if (await mb.ShowDialogAsync(true, default) != W.MessageBoxResult.Primary) return;
@@ -160,7 +160,7 @@ public sealed class EqPage : PageBase
     async void DeletePreset()
     {
         if (_preset.SelectedItem is not string name || !name.StartsWith("★ ")) return;
-        if (!await Ui.Confirm("删除预设", $"确定删除自定义预设“{name[2..]}”吗？", "删除", danger: true)) return;
+        if (!await Ui.Confirm("Delete preset", $"Delete the custom preset “{name[2..]}”?", "Delete", danger: true)) return;
         S.CustomPresets.RemoveAll(p => p.Bands == _n && p.Name == name[2..]);
         AppSettings.Save();
         Guard(() => FillPresets());

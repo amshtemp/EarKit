@@ -5,7 +5,7 @@ using System.Windows.Media;
 using Microsoft.Win32;
 namespace EarKit.Services;
 
-/// <summary>窗口背景效果（云母/亚克力/纯色）完全由这里通过 DWM 控制，避免与 WPF-UI 的自动切换互相覆盖。</summary>
+/// <summary>Controls the window background effect (Mica, Acrylic, or solid) through DWM to avoid conflicts with WPF-UI.</summary>
 public static class Backdrop
 {
     [DllImport("dwmapi.dll")] static extern int DwmSetWindowAttribute(IntPtr hwnd, int attr, ref int value, int size);
@@ -14,7 +14,7 @@ public static class Backdrop
 
     const int DWMWA_USE_IMMERSIVE_DARK_MODE = 20, DWMWA_SYSTEMBACKDROP_TYPE = 38;
 
-    /// <summary>Windows 11 22H2 (22621) 及以上才支持系统背景效果。</summary>
+    /// <summary>System backdrop effects require Windows 11 22H2 (22621) or later.</summary>
     public static bool Supported => Environment.OSVersion.Version.Build >= 22621;
 
     public static bool SystemIsDark()

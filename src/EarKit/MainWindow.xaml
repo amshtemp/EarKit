@@ -25,14 +25,14 @@
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
-            <!-- 左侧导航 -->
+            <!-- Left navigation -->
             <DockPanel Grid.Column="0" Margin="4,4,0,8">
                 <Border DockPanel.Dock="Bottom" Margin="10,8,10,4" Padding="12,10" CornerRadius="8"
                         Background="{DynamicResource SubtleFillColorSecondaryBrush}">
                     <StackPanel>
                         <StackPanel Orientation="Horizontal">
                             <Ellipse x:Name="NavDot" Width="8" Height="8" Fill="Gray" VerticalAlignment="Center" Margin="0,0,8,0" />
-                            <TextBlock x:Name="NavStatus" Text="未连接" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                            <TextBlock x:Name="NavStatus" Text="Not connected" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
                                        TextTrimming="CharacterEllipsis" />
                         </StackPanel>
                         <TextBlock x:Name="NavBattery" Text="" FontSize="12" Margin="16,4,0,0" Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
@@ -41,7 +41,7 @@
                 <ListBox x:Name="Nav" Style="{StaticResource NavList}" SelectionChanged="Nav_SelectionChanged" />
             </DockPanel>
 
-            <!-- 右侧内容 -->
+            <!-- Main content -->
             <Grid Grid.Column="1" Margin="8,4,16,12">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
@@ -49,7 +49,7 @@
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
 
-                <!-- 连接栏 -->
+                <!-- Connection bar -->
                 <Border Grid.Row="0" Style="{StaticResource Panel}" Padding="12,10">
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -61,10 +61,10 @@
                         </Grid.ColumnDefinitions>
                         <ui:SymbolIcon x:Name="ConnIcon" Grid.Column="0" Symbol="Bluetooth24" FontSize="22" Margin="4,0,12,0" VerticalAlignment="Center" />
                         <ComboBox x:Name="DeviceBox" Grid.Column="1" MinWidth="260" VerticalAlignment="Center" />
-                        <ui:Button x:Name="RefreshBtn" Grid.Column="2" Margin="8,0,0,0" Icon="{ui:SymbolIcon ArrowSync24}" ToolTip="刷新设备列表"
+                        <ui:Button x:Name="RefreshBtn" Grid.Column="2" Margin="8,0,0,0" Icon="{ui:SymbolIcon ArrowSync24}" ToolTip="Refresh device list"
                                    Click="Refresh_Click" VerticalAlignment="Stretch" />
                         <ui:Button x:Name="ConnectBtn" Grid.Column="3" Margin="8,0,0,0" MinWidth="104" Appearance="Primary"
-                                   Icon="{ui:SymbolIcon PlugConnected24}" Content="连接" Click="Connect_Click" VerticalAlignment="Stretch" />
+                                   Icon="{ui:SymbolIcon PlugConnected24}" Content="Connect" Click="Connect_Click" VerticalAlignment="Stretch" />
                         <ui:ProgressRing x:Name="Busy" Grid.Column="4" Width="22" Height="22" Margin="12,0,4,0" IsIndeterminate="True" Visibility="Collapsed" />
                     </Grid>
                 </Border>

@@ -46,14 +46,14 @@
         <Setter Property="Padding" Value="16" />
     </Style>
 
-    <!-- 设置行：标题+说明在左，控件在右 -->
+    <!-- Settings row: title and description on the left, control on the right -->
     <Style x:Key="Row" TargetType="Border" BasedOn="{StaticResource Panel}">
         <Setter Property="Padding" Value="16,12" />
         <Setter Property="Margin" Value="0,0,0,4" />
         <Setter Property="MinHeight" Value="64" />
     </Style>
 
-    <!-- 大号模式卡片（降噪 / 子模式选择） -->
+    <!-- Large mode cards for noise control and submode selection -->
     <Style x:Key="ModeCard" TargetType="RadioButton">
         <Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}" />
         <Setter Property="Background" Value="{DynamicResource CardBackgroundFillColorDefaultBrush}" />
@@ -87,13 +87,13 @@
         </Setter>
     </Style>
 
-    <!-- 小号胶囊选择（子模式） -->
+    <!-- Compact pill buttons for submode selection -->
     <Style x:Key="PillRadio" TargetType="RadioButton" BasedOn="{StaticResource ModeCard}">
         <Setter Property="MinHeight" Value="40" />
         <Setter Property="MinWidth" Value="120" />
     </Style>
 
-    <!-- 左侧导航项 -->
+    <!-- Left navigation item -->
     <Style x:Key="NavItem" TargetType="ListBoxItem">
         <Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}" />
         <Setter Property="Margin" Value="6,1" />
