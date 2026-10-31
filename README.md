@@ -133,7 +133,7 @@ You can choose whether to delete this personal data when uninstalling.
 
 ## 🛠️ Building from source
 
-Requires the [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0) and [NSIS 3](https://nsis.sourceforge.io/) (required to build the installer).
+Requires the [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0) and [Inno Setup 7](https://jrsoftware.org/isinfo.php) (required to build the installer).
 
 ```powershell
 git clone https://github.com/ChuiFeng-wind/EarKit.git
@@ -154,7 +154,7 @@ src/EarKit/
 ├─ Services/    Device control, tray, global hotkeys, settings, background effects
 ├─ Controls/    Custom-drawn controls such as battery rings and EQ curves
 └─ Pages/       Feature pages
-installer/      NSIS installer script and installer license
+installer/      Inno Setup installer script and installer license
 ```
 
 Tech stack: C# · .NET 10 · WPF · [WPF UI](https://github.com/lepoco/wpfui) · [H.NotifyIcon](https://github.com/HavenDV/H.NotifyIcon)
