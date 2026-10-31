@@ -25,7 +25,7 @@ jobs:
         run: |
           if (-not (Test-Path "${env:ProgramFiles}\Inno Setup 7\ISCC.exe")) {
             # choco install innosetup -y --no-progress
-            winget install -e --id JRSoftware.InnoSetup.7 --scope machine
+            winget install -e --id JRSoftware.InnoSetup.7 --scope machine --accept-source-agreements
           }
 
       - name: Build
