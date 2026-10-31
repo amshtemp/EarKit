@@ -20,10 +20,13 @@ jobs:
         with:
           dotnet-version: '10.0.x'
 
-      - name: Install NSIS
+      - name: Install Inno Setup 7
         shell: pwsh
         run: |
-          if (-not (Test-Path "${env:ProgramFiles(x86)}\NSIS\makensis.exe")) { choco install nsis -y --no-progress }
+          if (-not (Test-Path "${env:ProgramFiles}\Inno Setup 7\ISCC.exe")) {
+            # choco install innosetup -y --no-progress
+            winget install -e --id JRSoftware.InnoSetup.7 --scope machine --accept-source-agreements
+          }
 
       - name: Build
         shell: pwsh

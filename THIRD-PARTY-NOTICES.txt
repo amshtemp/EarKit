@@ -37,10 +37,12 @@ notices and licenses are reproduced or referenced below.
    Redistributed unmodified as part of the EarKit installer, as permitted by
    the "Distributable Code" terms of that license.
 
-6. NSIS (Nullsoft Scriptable Install System) — used to build the installer
-   https://nsis.sourceforge.io/
-   Copyright (C) 1999-2023 Contributors
-   License: zlib/libpng license (installer stub and plugins)
+6. Inno Setup — used to build the installer
+   https://jrsoftware.org/isinfo.php
+   Copyright (C) 1997-2026 Jordan Russell
+   Copyright (C) 2000-2026 Martijn Laan
+   License: Inno Setup License
+   https://jrsoftware.org/files/is/license.txt
 
 -------------------------------------------------------------------------------
 MIT License (applies to items 1–4)
