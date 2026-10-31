@@ -23,9 +23,9 @@ jobs:
       - name: Install Inno Setup 7
         shell: pwsh
         run: |
-          if (-not (Test-Path "${env:ProgramFiles}\Inno Setup 7\ISCC.exe") -and
-              -not (Test-Path "${env:ProgramFiles(x86)}\Inno Setup 7\ISCC.exe")) {
-            choco install innosetup -y --no-progress
+          if (-not (Test-Path "${env:ProgramFiles}\Inno Setup 7\ISCC.exe")) {
+            # choco install innosetup -y --no-progress
+            winget install -e --id JRSoftware.InnoSetup.7 --scope machine
           }
 
       - name: Build
